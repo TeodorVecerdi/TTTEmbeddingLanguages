@@ -2,10 +2,6 @@
 using System.Linq;
 using Embedded.Data;
 
-namespace Embedded {
-    
-}
-
 // ReSharper disable CheckNamespace
 namespace Embedded {
     namespace Data {

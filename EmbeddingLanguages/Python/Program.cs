@@ -11,11 +11,11 @@ namespace Python {
             Runtime.Runtime.PythonDLL = "python39.dll";
 
             using (Py.GIL()) {
-                using (var hello = Py.Import("resources.hello") as PyScope) {
-                    Debug.Assert(hello != null);
-                    // Get types
+                // Load main module
+                using (var scope = Py.Import("resources.main") as PyScope) {
+                    Debug.Assert(scope != null);
                     // Experiment1(hello);
-                    Experiment_CreateObject(hello);
+                    Experiment_CreateObject(scope);
                 }
             }
         }
