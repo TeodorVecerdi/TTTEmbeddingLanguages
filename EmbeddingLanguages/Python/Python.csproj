@@ -4,5 +4,21 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="pythonnet" Version="3.0.0-preview2021-03-03" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Content Include="resources\**" />
+    </ItemGroup> 
+
+    <ItemGroup>
+        <ResFolder Include="resources\**" Visible="false" />
+    </ItemGroup>
+    
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Copy SourceFiles="@(ResFolder)" DestinationFolder="$(OutDir)resources/" ContinueOnError="false" />
+    </Target>
 
 </Project>
