@@ -6,28 +6,28 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="pythonnet" Version="3.0.0-preview2021-03-03"/>
+        <PackageReference Include="pythonnet" Version="3.0.0-preview2021-03-03" />
     </ItemGroup>
 
     <ItemGroup>
-        <ResFolder Include="resources\**" Exclude="resources\**\__pycache__;**\*.pyc" Visible="false"/>
+        <ResFolder Include="resources\**" Exclude="resources\**\__pycache__;**\*.pyc" Visible="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <Content Remove="resources\**"/>
-        <None Remove="resources\**"/>
-        <Content Include="resources\**\*.py"/>
+        <Content Remove="resources\**" />
+        <None Remove="resources\**" />
+        <Content Include="resources\**\*.py" />
     </ItemGroup>
 
     <Target Name="MoveResources" AfterTargets="PostBuildEvent">
-        <Message Text="+++ Moved resources folder to output directory" Importance="High"/>
-        <Copy SourceFiles="@(ResFolder)" DestinationFiles="@(ResFolder->'$(OutDir)resources\%(RecursiveDir)%(Filename)%(Extension)')" ContinueOnError="false"/>
+        <Message Text="+++ Moved resources folder to output directory" Importance="High" />
+        <Copy SourceFiles="@(ResFolder)" DestinationFiles="@(ResFolder->'$(OutDir)resources\%(RecursiveDir)%(Filename)%(Extension)')" ContinueOnError="false" />
     </Target>
 
     <Target Name="RemoveResources" AfterTargets="Clean">
-        <Message Text="+++ Removed resources folder from output directory" Importance="High"/>
-        <RemoveDir Directories="$(OutDir)resources"/>
-        <RemoveDir Directories="$(OutDir)ref"/>
+        <Message Text="+++ Removed resources folder from output directory" Importance="High" />
+        <RemoveDir Directories="$(OutDir)resources" />
+        <RemoveDir Directories="$(OutDir)ref" />
     </Target>
 
 </Project>
