@@ -132,7 +132,8 @@ namespace Embedded {
                 return $"{Name}:\n{transform}";
             }
         }
-        public class Component {
+        
+        public abstract class Component {
             public GameObject Owner;
 
             public virtual void OnStart() {

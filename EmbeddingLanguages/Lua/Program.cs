@@ -12,7 +12,8 @@ namespace Lua {
         public static void Main() {
             using var lua = new NLua.Lua();
             lua.LoadCLRPackage();
-            lua.DoFile($"{resources}/hello.lua");
+            lua.DoFile($"{resources}/GameObject.lua");
+            lua.DoFile($"{resources}/main.lua");
             var hello = (Vector3)(lua["CreateVector"] as LuaFunction).Call(0.5f, 2.345f, -6.9f)[0];
             Console.WriteLine(hello);
         }
