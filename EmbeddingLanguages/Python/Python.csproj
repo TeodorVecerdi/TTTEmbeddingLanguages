@@ -19,6 +19,10 @@
         <Content Include="resources\**\*.py" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\Shared\Shared.csproj" />
+    </ItemGroup>
+
     <Target Name="MoveResources" AfterTargets="PostBuildEvent">
         <Message Text="+++ Moved resources folder to output directory" Importance="High" />
         <Copy SourceFiles="@(ResFolder)" DestinationFiles="@(ResFolder->'$(OutDir)resources\%(RecursiveDir)%(Filename)%(Extension)')" ContinueOnError="false" />

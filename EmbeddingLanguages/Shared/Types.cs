@@ -1,12 +1,23 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Embedded.Data;
 
 // ReSharper disable CheckNamespace
 namespace Embedded {
     namespace Data {
-        public record Vector3(float X, float Y, float Z) {
+        public struct Vector3 {
+            public float X;
+            public float Y;
+            public float Z;
+            
             public Vector3(float value) : this(value, value, value) {
+            }
+
+            public Vector3(float x, float y, float z) {
+                X = x;
+                Y = y;
+                Z = z;
             }
 
             public static Vector3 operator +(Vector3 first, Vector3 second) {
@@ -27,6 +38,12 @@ namespace Embedded {
 
             public override string ToString() {
                 return $"[{X}, {Y}, {Z}]";
+            }
+
+            public void Deconstruct(out float x, out float y, out float z) {
+                x = X;
+                y = Y;
+                z = Z;
             }
         }
         public class Transform {
@@ -115,13 +132,15 @@ namespace Embedded {
                 return $"{Name}:\n{transform}";
             }
         }
-        public abstract class Component {
+        public class Component {
             public GameObject Owner;
 
             public virtual void OnStart() {
+                Console.WriteLine("Component::OnStart");
             }
 
             public virtual void OnUpdate(float delta) {
+                Console.WriteLine("Component::OnUpdate");
             }
         }
     }
