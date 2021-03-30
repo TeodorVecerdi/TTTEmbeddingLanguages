@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Embedded;
 
 namespace Lua {
     public static class Program {
@@ -12,6 +13,9 @@ namespace Lua {
             
             lua.LoadCLRPackage();
             lua.DoFile($"{resources}/hello.lua");
+            lua.DoString(@"obj:Say()");
+            lua["obj"] = new HelloWorld("TEODOR");
+            lua.DoString(@"obj:Say()");
         }
     }
 }
