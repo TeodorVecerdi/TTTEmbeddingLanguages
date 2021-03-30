@@ -4,6 +4,10 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="DynamicLua" Version="1.1.2" />
+    </ItemGroup>
 
     <ItemGroup>
         <Content Remove="resources\**" />
