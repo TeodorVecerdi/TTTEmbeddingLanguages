@@ -4,6 +4,12 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
+    
+    <ItemGroup>
+        <ProjectReference Include="../Shared/Shared.csproj">
+            <Name>Shared</Name>
+        </ProjectReference>
+    </ItemGroup>
 
     <ItemGroup>
         <Content Remove="resources\**" />
