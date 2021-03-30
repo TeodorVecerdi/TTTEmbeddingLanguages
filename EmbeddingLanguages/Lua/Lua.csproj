@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Content Remove="resources\**" />
+        <None Remove="resources\**" />
+        <Content Include="resources\**\*.lua" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ResFolder Include="resources\**" Visible="false" />
+    </ItemGroup>
+
+    <Target Name="MoveResources" AfterTargets="PostBuildEvent">
+        <Message Text="+++ Moved resources folder to output directory" Importance="High" />
+        <Copy SourceFiles="@(ResFolder)" DestinationFiles="@(ResFolder->'$(OutDir)resources\%(RecursiveDir)%(Filename)%(Extension)')" ContinueOnError="false" />
+    </Target>
+
+    <Target Name="RemoveResources" AfterTargets="Clean">
+        <Message Text="+++ Removed resources folder from output directory" Importance="High" />
+        <RemoveDir Directories="$(OutDir)resources" />
+    </Target>
+
+</Project>
