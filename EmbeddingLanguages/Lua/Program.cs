@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using Embedded;
+using NLua;
 
 namespace Lua {
     public static class Program {
@@ -13,9 +14,9 @@ namespace Lua {
             
             lua.LoadCLRPackage();
             lua.DoFile($"{resources}/hello.lua");
-            lua.DoString(@"obj:Say()");
-            lua["obj"] = new HelloWorld("TEODOR");
-            lua.DoString(@"obj:Say()");
+            var create = lua["CreateObject"] as LuaFunction;
+            var hello = create.Call("TEODOR")[0] as HelloWorld;
+            hello.Say();
         }
     }
 }

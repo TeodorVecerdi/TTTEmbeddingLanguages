@@ -1,4 +1,6 @@
 --- import('Assembly', 'Namespace')
 import('Lua', 'Embedded')
 
-obj = HelloWorld('BOOM')
+function CreateObject(name)
+    return HelloWorld(name)
+end
