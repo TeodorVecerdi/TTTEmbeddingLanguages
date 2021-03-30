@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{134448C9-5E4E-4A8C-94E5-B2708A0B1E6E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lua", "Lua\Lua.csproj", "{9E23BF28-4EF0-4D1A-91F6-919EF46F7EAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python", "Python\Python.csproj", "{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{134448C9-5E4E-4A8C-94E5-B2708A0B1E6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{134448C9-5E4E-4A8C-94E5-B2708A0B1E6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{134448C9-5E4E-4A8C-94E5-B2708A0B1E6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{134448C9-5E4E-4A8C-94E5-B2708A0B1E6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E23BF28-4EF0-4D1A-91F6-919EF46F7EAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E23BF28-4EF0-4D1A-91F6-919EF46F7EAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E23BF28-4EF0-4D1A-91F6-919EF46F7EAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E23BF28-4EF0-4D1A-91F6-919EF46F7EAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
