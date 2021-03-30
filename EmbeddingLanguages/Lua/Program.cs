@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using Embedded;
-using NLua;
 
 namespace Lua {
     public static class Program {
@@ -10,12 +9,8 @@ namespace Lua {
         private static readonly string resources = Path.Combine(currentDirectory, resourcesDirectoryName);
 
         public static void Main() {
-            using var lua = new NLua.Lua();
-            
-            lua.LoadCLRPackage();
-            lua.DoFile($"{resources}/hello.lua");
-            var create = lua["CreateObject"] as LuaFunction;
-            var hello = create.Call("TEODOR")[0] as HelloWorld;
+            using var lua = new LuaWrapper(new () {{"Load .NET Types", true},{"Load File", $"{resources}/hello.lua"}});
+            var hello = lua.Call<HelloWorld>("CreateObject", "TEODOR");
             hello.Say();
         }
     }
