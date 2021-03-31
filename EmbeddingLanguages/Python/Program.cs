@@ -11,8 +11,14 @@ namespace Python {
             Runtime.Runtime.PythonDLL = "python39.dll";
 
             using (Py.GIL()) {
+                using var baseScope = Py.CreateScope();
+                baseScope.Exec(@"
+import clr
+clr.AddReference('Shared')
+del clr
+                ");
                 // Load main module
-                using (var scope = Py.Import("resources.main") as PyScope) {
+                using (var scope = baseScope.Import("resources.main") as PyScope) {
                     Debug.Assert(scope != null);
                     // Experiment1(hello);
                     Experiment_CreateObject(scope);
