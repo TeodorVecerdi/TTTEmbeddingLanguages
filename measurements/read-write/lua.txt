@@ -1,0 +1,50 @@
+using
+lua["key"] = value
+variable = (T) lua["key"]
+
+lua_writeNormalMemory =>
+    11535632 total bytes for 65536 writes,
+    176.019775390625 bytes/write
+lua_writeCleanupMemory =>
+    11534392 total bytes for 65536 writes,
+    176.0008544921875 bytes/write
+lua_readNormalMemory =>
+    11534400 total bytes for 65536 reads,
+    176.0009765625 bytes/read
+lua_readCleanupMemory =>
+    11534336 total bytes for 65536 reads,
+    176 bytes/read
+lua_writeNormalTime for 65536 writes =>
+    Min: 12.8452ms
+    Max: 22.0438ms
+    Avg (over 512 samples): 13.7073ms
+lua_readNormalTime for for 65536 reads =>
+    Min: 11.7428ms
+    Max: 14.9541ms
+    Avg (over 512 samples): 12.4214ms
+
+
+using
+lua.DoString($"key = {value}");
+variable = (T) lua.DoString("return key");
+
+lua_writeNormalMemory =>
+    8309056 total bytes for 65536 writes,
+    126.7861328125 bytes/write
+lua_writeCleanupMemory =>
+    8308528 total bytes for 65536 writes,
+    126.778076171875 bytes/write
+lua_readNormalMemory =>
+    11534464 total bytes for 65536 reads,
+    176.001953125 bytes/read
+lua_readCleanupMemory =>
+    11534336 total bytes for 65536 reads,
+    176 bytes/read
+lua_writeNormalTime for 65536 writes =>
+    Min: 343.0802ms
+    Max: 361.1141ms
+    Avg (over 32 samples): 349.4714ms
+lua_readNormalTime for 65536 reads =>
+    Min: 345.8417ms
+    Max: 372.4422ms
+    Avg (over 32 samples): 353.1858ms
