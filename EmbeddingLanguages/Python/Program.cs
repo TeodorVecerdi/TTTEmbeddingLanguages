@@ -41,12 +41,6 @@ namespace Python {
             return end - start;
         }
 
-        private static void Write(int writes, PyScope scope) {
-            for (int i = 0; i < writes; i++) {
-                scope.Set("a", i);
-            }
-        }
-        
         public static long ReadMem(int reads, Func<long> measureFunction, Action cleanupFunction) {
             long start, end;
             var a = 0;
@@ -87,8 +81,16 @@ namespace Python {
             return end - start;
         }
 
+        private static void Write(int writes, PyScope scope) {
+            for (int i = 0; i < writes; i++) {
+                // scope.Exec($"a = {i}");
+                scope.Set("a", i);
+            }
+        }
+
         private static void Read(int reads, ref int a, PyScope scope) {
             for (int i = 0; i < reads; i++) {
+                // a = scope.Eval<int>("a");
                 a = scope.Get<int>("a");
             }
         }

@@ -10,9 +10,7 @@ namespace Lua {
             using (var lua = new NLua.Lua()) {
                 cleanupFunction?.Invoke();
                 start = measureFunction();
-                for (int i = 0; i < writes; i++) {
-                    lua["a"] = i;
-                }
+                Write(writes, lua);
                 cleanupFunction?.Invoke();
                 end = measureFunction();
             }
@@ -25,26 +23,22 @@ namespace Lua {
             using (var lua = new NLua.Lua()) {
                 cleanupFunction?.Invoke();
                 start = measureFunction();
-                for (int i = 0; i < writes; i++) {
-                    lua["a"] = i;
-                }
+                Write(writes, lua);
                 cleanupFunction?.Invoke();
                 end = measureFunction();
             }
 
             return end - start;
         }
-        
+
         public static long ReadMem(int reads, Func<long> measureFunction, Action cleanupFunction) {
             long start, end;
-            var a = 0;
+            var a = 0.0;
             using (var lua = new NLua.Lua()) {
                 lua["a"] = a;
                 cleanupFunction?.Invoke();
                 start = measureFunction();
-                for (int i = 0; i < reads; i++) {
-                    a = lua.GetInteger("a");
-                }
+                Read(reads, ref a, lua);
                 cleanupFunction?.Invoke();
                 end = measureFunction();
                 lua["a"] = a;
@@ -52,23 +46,35 @@ namespace Lua {
 
             return end - start;
         }
-        
+
         public static TimeSpan ReadTime(int reads, Func<DateTime> measureFunction, Action cleanupFunction) {
             DateTime start, end;
-            var a = 0;
+            var a = 0.0;
             using (var lua = new NLua.Lua()) {
                 lua["a"] = a;
                 cleanupFunction?.Invoke();
                 start = measureFunction();
-                for (int i = 0; i < reads; i++) {
-                    a = lua.GetInteger("a");
-                }
+                Read(reads, ref a, lua);
                 cleanupFunction?.Invoke();
                 end = measureFunction();
                 lua["a"] = a;
             }
 
             return end - start;
+        }
+
+        private static void Write(int writes, NLua.Lua lua) {
+            for (int i = 0; i < writes; i++) {
+                // lua.DoString($"a = {i}");
+                lua["a"] = i;
+            }
+        }
+
+        private static void Read(int reads, ref double a, NLua.Lua lua) {
+            for (int i = 0; i < reads; i++) {
+                // a = (double) lua.DoString("return a")[0];
+                a = (double) lua["a"];
+            }
         }
     }
 }
