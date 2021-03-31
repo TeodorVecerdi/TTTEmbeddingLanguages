@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Lua\Lua.csproj" />
       <ProjectReference Include="..\Python\Python.csproj" />
     </ItemGroup>
 
