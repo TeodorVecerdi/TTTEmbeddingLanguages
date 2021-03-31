@@ -1,39 +1,74 @@
 ﻿using System;
-using System.IO;
 
 namespace Lua {
-    public static class Program {
+    public static class LuaProgram {
         public static void Main() {
-            RunGC();
         }
 
-        internal static void RunNormal() {
-            int a;
+        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction) {
+            long start, end;
             using (var lua = new NLua.Lua()) {
-                for (int i = 0; i < 10000; i++) {
-                    lua.DoString($"a{i} = {i}");
+                cleanupFunction?.Invoke();
+                start = measureFunction();
+                for (int i = 0; i < writes; i++) {
+                    lua["a"] = i;
                 }
-
-                a = lua.GetInteger("a9999");
+                cleanupFunction?.Invoke();
+                end = measureFunction();
             }
 
-            Console.WriteLine(a);
+            return end - start;
         }
-
-        internal static void RunGC() {
-            int a;
+        
+        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction) {
+            DateTime start, end;
             using (var lua = new NLua.Lua()) {
-                GC.Collect();
-                for (int i = 0; i < 10000; i++) {
-                    lua.DoString($"a{i} = {i}");
+                cleanupFunction?.Invoke();
+                start = measureFunction();
+                for (int i = 0; i < writes; i++) {
+                    lua["a"] = i;
                 }
-
-                GC.Collect();
-                a = lua.GetInteger("a9999");
+                cleanupFunction?.Invoke();
+                end = measureFunction();
             }
 
-            GC.Collect();
-            Console.WriteLine(a);
+            return end - start;
+        }
+        
+        public static long ReadMem(int reads, Func<long> measureFunction, Action cleanupFunction) {
+            long start, end;
+            var a = 0;
+            using (var lua = new NLua.Lua()) {
+                lua["a"] = a;
+                cleanupFunction?.Invoke();
+                start = measureFunction();
+                for (int i = 0; i < reads; i++) {
+                    a = lua.GetInteger("a");
+                }
+                cleanupFunction?.Invoke();
+                end = measureFunction();
+                lua["a"] = a;
+            }
+
+            return end - start;
+        }
+        
+        public static TimeSpan ReadTime(int reads, Func<DateTime> measureFunction, Action cleanupFunction) {
+            DateTime start, end;
+            var a = 0;
+            using (var lua = new NLua.Lua()) {
+                lua["a"] = a;
+                cleanupFunction?.Invoke();
+                start = measureFunction();
+                for (int i = 0; i < reads; i++) {
+                    a = lua.GetInteger("a");
+                }
+                cleanupFunction?.Invoke();
+                end = measureFunction();
+                lua["a"] = a;
+            }
+
+            return end - start;
         }
     }
 }
