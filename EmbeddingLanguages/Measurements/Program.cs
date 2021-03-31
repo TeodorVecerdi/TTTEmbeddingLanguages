@@ -26,11 +26,28 @@ namespace Measurements {
 
             
             var sampleCount = 512;
-            var py_writeNormalTime = Measure(sampleCount, (func, action) => PythonProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
-            var py_readNormalTime = Measure(sampleCount, (func, action) => PythonProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var py_writeNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var py_readNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var lua_writeNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var lua_readNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
             
-            var lua_writeNormalTime = Measure(sampleCount, (func, action) => LuaProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
-            var lua_readNormalTime = Measure(sampleCount, (func, action) => LuaProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var py_writeNormalTime = Process(py_writeNormalTimeSamples);
+            var py_readNormalTime = Process(py_readNormalTimeSamples);
+            var lua_writeNormalTime = Process(lua_writeNormalTimeSamples);
+            var lua_readNormalTime = Process(lua_readNormalTimeSamples);
+
+        }
+
+        internal static (TimeSpan min, TimeSpan max, TimeSpan avg) Process(List<TimeSpan> samples) {
+            TimeSpan min, max, sum;
+            min = max = samples[0];
+            sum = TimeSpan.Zero;
+            foreach (var timeSpan in samples) {
+                sum += timeSpan;
+                if (timeSpan < min) min = timeSpan;
+                if (timeSpan > max) max = timeSpan;
+            }
+            return (min, max, sum / samples.Count);
         }
 
         internal static List<TR> Measure<TM, TR>(int sampleCount, Func<Func<TM>, Action, TR> function, Action cleanupFunctionSelf, Action cleanupFunction, Func<TM> measureFunction) {
