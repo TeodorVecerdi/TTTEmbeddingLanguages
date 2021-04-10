@@ -1,4 +1,5 @@
 ﻿import clr
+clr.AddReference("Shared")
 # noinspection PyUnresolvedReferences
 from System.Collections.Generic import List
 # noinspection PyUnresolvedReferences
@@ -51,9 +52,11 @@ def run():
 
 def make_enemy(enemy: GameObject):
     walk_comp = RandomWalk(random.uniform(1, 4), random.uniform(5, 10))
+    follow_comp = TargetFollow(None, random.uniform(1, 2))
     collider_comp = SphereCollider(random.uniform(5, 10))
     enemy_ai_comp = EnemyAI()
     enemy.AddComponent[RandomWalk](walk_comp)
+    enemy.AddComponent[TargetFollow](follow_comp)
     enemy.AddComponent[SphereCollider](collider_comp)
     enemy.AddComponent[EnemyAI](enemy_ai_comp)
 
