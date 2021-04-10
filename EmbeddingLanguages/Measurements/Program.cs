@@ -1,12 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
+using Embedded;
+using Embedded.Components;
 using Lua;
 using Python;
+using Python.Runtime;
 
 namespace Measurements {
     class Program {
         static void Main(string[] args) {
             PythonProgram.Initialize();
+            var gameManager = new GameManager();
+            using var gil = Py.GIL();
+            using var scope = Py.Import("pyresources.main");
+            // scope.Exec("import clr");
+            // scope.Exec("clr.AddReference('Shared')");
+            // scope.Set("test", new GameObject().ToPython());
+//             scope.Exec(@"
+// print(test.HasComponent.__class__)
+// ");
+            return;
 
             // int enemyCount = Rand.Range(64, 128), walkerCount = Rand.Range(64, 128), targetFollowCount = Rand.Range(64, 128);
             int enemyCount = 118, walkerCount = 121, targetFollowCount = 86;
