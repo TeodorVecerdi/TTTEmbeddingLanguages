@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Embedded;
 
-namespace Shared.Utilities {
+namespace Embedded {
     public class GameManager {
         private static GameManager instance;
         public static GameManager Instance => instance;

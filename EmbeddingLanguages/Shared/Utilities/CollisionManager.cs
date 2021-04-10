@@ -5,8 +5,8 @@ using Embedded.Components;
 
 namespace Embedded {
     public class CollisionManager {
-        private static Dictionary<GameObject, List<SphereCollider>> colliders = new();
-        private static List<(GameObject, GameObject)> colliding = new();
+        private static readonly Dictionary<GameObject, List<SphereCollider>> colliders = new();
+        private static readonly List<(GameObject, GameObject)> colliding = new();
 
         public static void Register(GameObject gameObject, SphereCollider collider) {
             if (!colliders.ContainsKey(gameObject)) colliders[gameObject] = new List<SphereCollider>();

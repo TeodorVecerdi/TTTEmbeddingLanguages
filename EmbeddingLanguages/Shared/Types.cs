@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Embedded.Components;
 using Embedded.Data;
-using Shared.Utilities;
 using UnityEngine;
 
 // ReSharper disable CheckNamespace
