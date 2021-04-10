@@ -1,57 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Embedded.Components;
 using Embedded.Data;
+using Shared.Utilities;
+using UnityEngine;
 
 // ReSharper disable CheckNamespace
 namespace Embedded {
     namespace Data {
-        public struct Vector3 {
-            public float X;
-            public float Y;
-            public float Z;
-            
-            public Vector3(float value) : this(value, value, value) {
-            }
-
-            public Vector3(float x, float y, float z) {
-                X = x;
-                Y = y;
-                Z = z;
-            }
-
-            public static Vector3 operator +(Vector3 first, Vector3 second) {
-                return new(first.X + second.X, first.Y + second.Y, first.Z + second.Z);
-            }
-
-            public static Vector3 operator -(Vector3 first, Vector3 second) {
-                return new(first.X - second.X, first.Y - second.Y, first.Z - second.Z);
-            }
-
-            public static Vector3 operator *(Vector3 first, Vector3 second) {
-                return new(first.X * second.X, first.Y * second.Y, first.Z * second.Z);
-            }
-
-            public static Vector3 operator *(Vector3 first, float second) {
-                return new(first.X * second, first.Y * second, first.Z * second);
-            }
-
-            public override string ToString() {
-                return $"[{X}, {Y}, {Z}]";
-            }
-
-            public void Deconstruct(out float x, out float y, out float z) {
-                x = X;
-                y = Y;
-                z = Z;
-            }
-        }
         public class Transform {
             public Vector3 Position;
             public Vector3 Scale;
             public Vector3 EulerAngles;
 
-            public Transform() : this(new Vector3(0), new Vector3(1), new Vector3(0)) {
+            public Transform() : this(new Vector3(0, 0, 0), new Vector3(1, 1, 1), new Vector3(0, 0, 0)) {
             }
 
             /// <summary>Initializes a new instance of the <see cref="T:System.Object" /> class.</summary>
@@ -68,82 +31,130 @@ namespace Embedded {
             }
         }
     }
-    namespace GameObject {
-        public class GameObject {
-            private static int instanceCount = 0;
-            private readonly Transform transform = new();
-            private readonly List<Component> components = new();
-            public string Name;
 
-            public Vector3 Position {
-                get => transform.Position;
-                set => transform.Position = value;
-            }
-            public Vector3 Scale {
-                get => transform.Scale;
-                set => transform.Scale = value;
-            }
-            public Vector3 EulerAngles {
-                get => transform.EulerAngles;
-                set => transform.EulerAngles = value;
-            }
+    public class GameObject {
+        private static int instanceCount = 0;
+        private readonly Transform transform = new();
+        private readonly List<Component> components = new();
+        private bool isDestroying;
+        
+        public string Name;
+        public string Tag;
 
-            public GameObject() : this($"{nameof(GameObject)}_{instanceCount}"){
-            }
+        public Vector3 Position {
+            get => transform.Position;
+            set => transform.Position = value;
+        }
+        public Vector3 Scale {
+            get => transform.Scale;
+            set => transform.Scale = value;
+        }
+        public Vector3 EulerAngles {
+            get => transform.EulerAngles;
+            set => transform.EulerAngles = value;
+        }
 
-            private GameObject(string name) {
-                Name = name;
-                instanceCount++;
-            }
+        public GameObject() : this($"{nameof(GameObject)}_{instanceCount}", "Object") {
+        }
 
-            public void Start() {
-                foreach (var component in components) {
-                    component.OnStart();
-                }
-            }
+        private GameObject(string name, string tag) {
+            Name = name;
+            Tag = tag;
+            instanceCount++;
 
-            public void Update(float delta) {
-                foreach (var component in components) {
-                    component.OnUpdate(delta);
-                }
-            }
-
-            public void AddComponent<T>(T component) where T : Component {
-                component.Owner = this;
-                components.Add(component);
-            }
-
-            public void RemoveComponent<T>(T component) where T : Component {
-                if (!components.Remove(component)) return;
-                component.Owner = null;
-            }
-
-            public bool HasComponent<T>() where T : Component {
-                return components.Any(component => component is T);
-            }
-
-            public T GetComponent<T>() where T : Component {
-                return components.First(component => component is T) as T;
-            }
-
-            /// <summary>Returns a string that represents the current object.</summary>
-            /// <returns>A string that represents the current object.</returns>
-            public override string ToString() {
-                return $"{Name}:\n{transform}";
-            }
+            GameManager.Instance.Register(this);
         }
         
-        public abstract class Component {
-            public GameObject Owner;
-
-            public virtual void OnStart() {
-                Console.WriteLine("Component::OnStart");
-            }
-
-            public virtual void OnUpdate(float delta) {
-                Console.WriteLine("Component::OnUpdate");
+        public void Awake() {
+            foreach (var component in components) {
+                component.OnAwake();
             }
         }
+
+        public void Start() {
+            foreach (var component in components) {
+                component.OnStart();
+            }
+        }
+
+        public void Update(float delta) {
+            foreach (var component in components) {
+                component.OnUpdate(delta);
+            }
+        }
+
+        public void Destroy() {
+            foreach (var component in components) {
+                component.OnDestroy();
+            }
+        }
+
+        public void AddComponent<T>(T component) where T : Component {
+            component.Owner = this;
+            components.Add(component);
+
+            if (typeof(T) == typeof(SphereCollider)) {
+                CollisionManager.Register(this, component as SphereCollider);
+            }
+
+            if (GameManager.Instance.GameStarted) {
+                GameManager.Instance.QueueComponentInitialization(component);
+            }
+        }
+
+        public void RemoveComponent<T>(T component) where T : Component {
+            if (!components.Remove(component)) return;
+            component.Owner = null;
+            if (typeof(T) == typeof(SphereCollider)) {
+                CollisionManager.Deregister(this, component as SphereCollider);
+            }
+        }
+
+        public bool HasComponent<T>() where T : Component {
+            return components.Any(component => component is T);
+        }
+
+        public T GetComponent<T>() where T : Component {
+            return components.First(component => component is T) as T;
+        }
+        
+        public List<T> GetComponents<T>() where T : Component {
+            return components.OfType<T>().ToList();
+        }
+
+        internal List<Component> GetComponents() {
+            return components.ToList();
+        }
+
+        public static void Destroy(GameObject gameObject) {
+            if(gameObject.isDestroying) return;
+            gameObject.isDestroying = true;
+            GameManager.Instance.QueueDestroy(gameObject);
+        }
+
+        public static GameObject FindGameObject(string name) => GameManager.Instance.FindGameObject(name);
+
+        /// <summary>Returns a string that represents the current object.</summary>
+        /// <returns>A string that represents the current object.</returns>
+        public override string ToString() {
+            return $"{Name}:\n{transform}";
+        }
+    }
+
+    public abstract class Component {
+        public GameObject Owner;
+        
+        public virtual void OnAwake() {}
+        public virtual void OnStart() {}
+        public virtual void OnUpdate(float delta) {}
+        public virtual void OnDestroy() {}
+        
+        public virtual void OnCollisionEnter(GameObject other) {}
+        public virtual void OnCollisionStay(GameObject other) {}
+        public virtual void OnCollisionExit(GameObject other) {}
+        
+        public static void Destroy(GameObject gameObject) => GameObject.Destroy(gameObject);
+        public static GameObject FindGameObject(string name) => GameManager.Instance.FindGameObject(name);
     }
 
     namespace Helper {
