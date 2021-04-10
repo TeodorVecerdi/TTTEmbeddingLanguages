@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Embedded;
 using Embedded.Components;
 
 namespace Embedded {
-    public class CollisionManager {
+    public static class CollisionManager {
         private static readonly Dictionary<GameObject, List<SphereCollider>> colliders = new();
         private static readonly HashSet<int> colliding = new();
 
