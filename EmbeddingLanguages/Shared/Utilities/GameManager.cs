@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Embedded;
 
 namespace Embedded {
     public class GameManager {
@@ -23,21 +22,25 @@ namespace Embedded {
             lastTime = DateTime.Now;
             objects.ForEach(o => o.Awake());
             objects.ForEach(o => o.Start());
+            Console.WriteLine($"Started game. Ran Awake and Start on {objects.Count} objects");
         }
 
         public void UpdateGame() {
             var now = DateTime.Now;
             var timeSpan = now - lastTime;
+            Console.WriteLine($"Running Update with a deltaTime of {timeSpan.TotalSeconds:F4} s {timeSpan.TotalMilliseconds:F2} ms");
             lastTime = now;
             
             while (componentInitializationQueue.Count > 0) {
                 var comp = componentInitializationQueue.Dequeue();
                 comp.OnStart();
+                Console.WriteLine("Initialized component");
             }
             while (destroyQueue.Count > 0) {
                 var obj = destroyQueue.Dequeue();
                 obj.Destroy();
                 objects.Remove(obj);
+                Console.WriteLine("Destroyed object");
             }
             foreach (var gameObject in objects) {
                 gameObject.Update((float) timeSpan.TotalSeconds);
