@@ -6,6 +6,10 @@ using Python;
 namespace Measurements {
     class Program {
         static void Main(string[] args) {
+            // MeasureBasic();
+        }
+
+        internal static void MeasureBasic() {
             var memoryCleanup = new Action(() => {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
@@ -51,6 +55,7 @@ namespace Measurements {
             Console.WriteLine($"py_readNormalTime => \n\tMin: {py_readNormalTime.min.TotalMilliseconds}ms\n\tMax: {py_readNormalTime.max.TotalMilliseconds}ms\n\tAvg (over {sampleCount} samples): {py_readNormalTime.avg.TotalMilliseconds}ms");
             Console.WriteLine($"lua_writeNormalTime => \n\tMin: {lua_writeNormalTime.min.TotalMilliseconds}ms\n\tMax: {lua_writeNormalTime.max.TotalMilliseconds}ms\n\tAvg (over {sampleCount} samples): {lua_writeNormalTime.avg.TotalMilliseconds}ms");
             Console.WriteLine($"lua_readNormalTime => \n\tMin: {lua_readNormalTime.min.TotalMilliseconds}ms\n\tMax: {lua_readNormalTime.max.TotalMilliseconds}ms\n\tAvg (over {sampleCount} samples): {lua_readNormalTime.avg.TotalMilliseconds}ms");
+        
         }
 
         internal static (TimeSpan min, TimeSpan max, TimeSpan avg) Process(List<TimeSpan> samples) {
