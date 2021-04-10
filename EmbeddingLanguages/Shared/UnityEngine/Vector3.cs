@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 namespace UnityEngine {
     // Representation of 3D vectors and points.
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector3 : IEquatable<Vector3>, IFormattable {
+    public class Vector3 : IEquatable<Vector3>, IFormattable {
         // *Undocumented*
         public const float kEpsilon = 0.00001F;
         // *Undocumented*
@@ -246,10 +246,15 @@ namespace UnityEngine {
         // Makes this vector have a ::ref::magnitude of 1.
         public void Normalize() {
             float mag = Magnitude(this);
-            if (mag > kEpsilon)
-                this = this / mag;
-            else
-                this = zero;
+            if (mag > kEpsilon) {
+                x /= mag;
+                y /= mag;
+                z /= mag;
+            } else {
+                x = 0;
+                y = 0;
+                z = 0;
+            }
         }
 
         // Returns this vector with a ::ref::magnitude of 1 (RO).

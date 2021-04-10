@@ -5,11 +5,13 @@ namespace Embedded.Components {
     public class RandomWalk : Component {
         public float MoveSpeed;
         public float TargetDistance;
+        public bool ShouldWalk;
         private Vector3 nextTarget;
 
         public RandomWalk(float moveSpeed, float targetDistance) {
             MoveSpeed = moveSpeed;
             TargetDistance = targetDistance;
+            ShouldWalk = true;
         }
 
         public override void OnStart() {
@@ -17,6 +19,7 @@ namespace Embedded.Components {
         }
 
         public override void OnUpdate(float delta) {
+            if(!ShouldWalk) return;
             var sqrDist = (nextTarget - Owner.Position).sqrMagnitude;
             if (sqrDist < 0.5f) {
                 nextTarget = GetNextTarget();

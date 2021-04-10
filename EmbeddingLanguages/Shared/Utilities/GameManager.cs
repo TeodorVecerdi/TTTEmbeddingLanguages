@@ -13,6 +13,7 @@ namespace Embedded {
 
         public GameManager() {
             instance = this;
+            // Console.WriteLine("Created instance of game manager");
         }
         
         public bool GameStarted => gameStarted;
@@ -22,7 +23,7 @@ namespace Embedded {
             lastTime = DateTime.Now;
             objects.ForEach(o => o.Awake());
             objects.ForEach(o => o.Start());
-            Console.WriteLine($"Started game. Ran Awake and Start on {objects.Count} objects");
+            // Console.WriteLine($"Started game. Ran Awake and Start on {objects.Count} objects");
         }
 
         public void UpdateGame() {
@@ -34,18 +35,22 @@ namespace Embedded {
             while (componentInitializationQueue.Count > 0) {
                 var comp = componentInitializationQueue.Dequeue();
                 comp.OnStart();
-                Console.WriteLine("Initialized component");
+                // Console.WriteLine("Initialized component");
             }
+            // Console.WriteLine("Finished component initialization");
             while (destroyQueue.Count > 0) {
                 var obj = destroyQueue.Dequeue();
                 obj.Destroy();
                 objects.Remove(obj);
-                Console.WriteLine("Destroyed object");
+                // Console.WriteLine("Destroyed object");
             }
+            // Console.WriteLine("Finished object destruction");
             foreach (var gameObject in objects) {
                 gameObject.Update((float) timeSpan.TotalSeconds);
             }
+            // Console.WriteLine("Finished object update");
             CollisionManager.Update();
+            // Console.WriteLine("Finished update");
         }
 
         public void Register(GameObject gameObject) {

@@ -40,6 +40,8 @@ namespace Embedded {
         public string Name;
         public string Tag;
 
+        public List<Component> Components => components;
+
         public Vector3 Position {
             get => transform.Position;
             set => transform.Position = value;
@@ -114,15 +116,11 @@ namespace Embedded {
         }
 
         public T GetComponent<T>() where T : Component {
-            return components.First(component => component is T) as T;
+            return components.FirstOrDefault(component => component is T) as T;
         }
         
-        public List<T> GetComponents<T>() where T : Component {
-            return components.OfType<T>().ToList();
-        }
-
-        internal List<Component> GetComponents() {
-            return components.ToList();
+        public IEnumerable<T> GetComponents<T>() where T : Component {
+            return components.OfType<T>();
         }
 
         public static void Destroy(GameObject gameObject) {
