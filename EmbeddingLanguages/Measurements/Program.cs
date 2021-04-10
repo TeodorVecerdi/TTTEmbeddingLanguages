@@ -6,7 +6,44 @@ using Python;
 namespace Measurements {
     class Program {
         static void Main(string[] args) {
-            // MeasureBasic();
+            PythonProgram.Initialize();
+
+            // int enemyCount = Rand.Range(64, 128), walkerCount = Rand.Range(64, 128), targetFollowCount = Rand.Range(64, 128);
+            int enemyCount = 118, walkerCount = 121, targetFollowCount = 86;
+            Console.WriteLine($"Starting test with {enemyCount} enemies, {walkerCount} walkers, {targetFollowCount} followers");
+
+            /*var gameManager = new GameManager();
+            var gameObjects = new List<GameObject>();
+            for (var i = 0; i < enemyCount; i++) {
+                var enemy = new GameObject();
+                enemy.Tag = "Enemy";
+                enemy.AddComponent(new RandomWalk(Rand.Range(1f, 4f), 100));
+                enemy.AddComponent(new TargetFollow(null, Rand.Range(1f, 2f)));
+                enemy.AddComponent(new SphereCollider(Rand.Range(2f, 5f)));
+                enemy.AddComponent(new EnemyAI());
+                gameObjects.Add(enemy);
+            }
+            
+            for (var i = 0; i < walkerCount; i++) {
+                var walker = new GameObject();
+                walker.Tag = "Walker";
+                walker.AddComponent(new RandomWalk(Rand.Range(3f, 5f), 100));
+                walker.AddComponent(new SphereCollider(Rand.Range(1f, 2f)));
+                gameObjects.Add(walker);
+            }
+            
+            for (var i = 0; i < targetFollowCount; i++) {
+                var follower = new GameObject();
+                follower.AddComponent(new TargetFollow(Rand.ListItem(gameObjects), Rand.Range(1f, 2f)));
+            }
+            gameObjects.Clear();
+            
+            gameManager.StartGame();
+            while (true) {
+                gameManager.UpdateGame();
+            }*/
+            PythonProgram.Test1(enemyCount, walkerCount, targetFollowCount);
+            // PythonProgram.Test0(gameObjects);
         }
 
         internal static void MeasureBasic() {
@@ -14,8 +51,6 @@ namespace Measurements {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             });
-
-            PythonProgram.Initialize();
 
             var actions = 65536;
             var py_writeNormalMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];

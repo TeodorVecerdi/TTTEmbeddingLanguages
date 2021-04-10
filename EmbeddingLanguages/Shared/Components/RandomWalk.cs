@@ -30,7 +30,7 @@ namespace Embedded.Components {
 
         private Vector3 GetNextTarget() {
             var randUnitCircle = Rand.InsideUnitCircle * TargetDistance;
-            return Owner.Position + randUnitCircle;
+            return randUnitCircle;
         }
     }
 }

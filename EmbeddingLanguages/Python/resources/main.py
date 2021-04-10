@@ -31,13 +31,11 @@ def initialize_game(enemy_count, random_walker_count, target_follow_count):
         random_walker.Tag = "Walker"
         game_objects.Add(random_walker)
         make_walker(random_walker)
-    target_followers = List[GameObject]()
     for i in range(target_follow_count):
         target_follow = GameObject()
-        target_followers.Add(target_follow)
         make_follower(target_follow)
 
-    game_objects.AddRange(target_followers)
+    game_objects.Clear()
 
 
 def start_game():
@@ -51,7 +49,7 @@ def run():
 
 
 def make_enemy(enemy: GameObject):
-    walk_comp = RandomWalk(random.uniform(1, 4), random.uniform(5, 10))
+    walk_comp = RandomWalk(random.uniform(1, 4), 100)
     follow_comp = TargetFollow(None, random.uniform(1, 2))
     collider_comp = SphereCollider(random.uniform(5, 10))
     enemy_ai_comp = EnemyAI()
@@ -62,7 +60,7 @@ def make_enemy(enemy: GameObject):
 
 
 def make_walker(walker: GameObject):
-    walk_comp = RandomWalk(random.uniform(3, 5), random.uniform(5, 10))
+    walk_comp = RandomWalk(random.uniform(3, 5), 100)
     collider_comp = SphereCollider(random.uniform(1, 3))
     walker.AddComponent[RandomWalk](walk_comp)
     walker.AddComponent[SphereCollider](collider_comp)

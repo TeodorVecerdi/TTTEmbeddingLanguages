@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Embedded;
 using Python.Runtime;
 
 namespace Python {
@@ -92,6 +93,25 @@ namespace Python {
             for (int i = 0; i < reads; i++) {
                 // a = scope.Eval<int>("a");
                 a = scope.Get<int>("a");
+            }
+        }
+
+        public static void Test0(List<GameObject> gameObjects) {
+            using var gil = Py.GIL();
+            using dynamic scope = Py.Import("pyresources.main");
+            scope.load(gameObjects);
+        }
+
+        public static void Test1(int enemyCount, int walkerCount, int followerCount) {
+            using var gil = Py.GIL();
+            using dynamic scope = Py.Import("pyresources.main");
+            scope.initialize_systems();
+            scope.initialize_game(enemyCount, walkerCount, followerCount);
+
+            scope.start_game();
+            
+            while (true) {
+                scope.run();
             }
         }
     }
