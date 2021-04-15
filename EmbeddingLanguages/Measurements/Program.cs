@@ -29,7 +29,8 @@ namespace Measurements {
                 GC.WaitForPendingFinalizers();
             });
             
-            const int actions = 1048576; // 1<<20
+            // const int actions = 1048576; // 1<<20
+            const int actions = 16384; // 1<<14
             var vector = new Vector3(1.0f, 2.0f, 3.0f);
             var transform = new Transform(new Vector3(1.0f, 2.0f, 3.0f), new Vector3(11.0f, 22.0f, 33.0f), new Vector3(111.0f, 222.0f, 333.0f));
             var bigObject = new BigObject();
@@ -46,7 +47,13 @@ namespace Measurements {
             var pythonWriteTransform = new Action<PyScope, int>((scope, idx) => scope.Set($"c", transform));
             var pythonWriteBigObj = new Action<PyScope, int>((scope, idx) => scope.Set($"d", bigObject));
             var pythonWriteBiggerObj = new Action<PyScope, int>((scope, idx) => scope.Set($"e", biggerObject));
-
+            
+            var luaWriteInt = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(a[idx], idx));
+            var luaWriteVector3 = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(b[idx], vector));
+            var luaWriteTransform = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(c[idx], transform));
+            var luaWriteBigObj = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(d[idx], bigObject));
+            var luaWriteBiggerObj = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(e[idx], biggerObject));
+/*
             var py_writeIntBytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteInt),
                                            memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
             var py_writeVector3Bytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteVector3),
@@ -57,12 +64,33 @@ namespace Measurements {
                                                  memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
             var py_writeBiggerObjBytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteBiggerObj),
                                               memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
-            Console.WriteLine($"py_writeIntBytes =>\n\t{py_writeIntBytes} total bytes for {actions} writes,\n\t{py_writeIntBytes / (double) actions} bytes/write");
-            Console.WriteLine($"py_writeVector3Bytes =>\n\t{py_writeVector3Bytes} total bytes for {actions} writes,\n\t{py_writeVector3Bytes / (double) actions} bytes/write");
-            Console.WriteLine($"py_writeTransformBytes =>\n\t{py_writeTransformBytes} total bytes for {actions} writes,\n\t{py_writeTransformBytes / (double) actions} bytes/write");
-            Console.WriteLine($"py_writeBigObjBytes =>\n\t{py_writeBigObjBytes} total bytes for {actions} writes,\n\t{py_writeBigObjBytes / (double) actions} bytes/write");
-            Console.WriteLine($"py_writeBiggerObjBytes =>\n\t{py_writeBiggerObjBytes} total bytes for {actions} writes,\n\t{py_writeBiggerObjBytes / (double) actions} bytes/write");
-
+            */
+            var lua_writeIntBytes = Measure(1, (measureFunction, cleanup) => LuaProgram.WriteMem(actions, measureFunction, cleanup, luaWriteInt),
+                                           memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            Console.WriteLine("lua_writeIntBytes done");
+            var lua_writeVector3Bytes = Measure(1, (measureFunction, cleanup) => LuaProgram.WriteMem(actions, measureFunction, cleanup, luaWriteVector3),
+                                               memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            Console.WriteLine("lua_writeVector3Bytes done");
+            var lua_writeTransformBytes = Measure(1, (measureFunction, cleanup) => LuaProgram.WriteMem(actions, measureFunction, cleanup, luaWriteTransform),
+                                                 memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            Console.WriteLine("lua_writeTransformBytes done");
+            var lua_writeBigObjBytes = Measure(1, (measureFunction, cleanup) => LuaProgram.WriteMem(actions, measureFunction, cleanup, luaWriteBigObj),
+                                              memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            Console.WriteLine("lua_writeBigObjBytes done");
+            var lua_writeBiggerObjBytes = Measure(1, (measureFunction, cleanup) => LuaProgram.WriteMem(actions, measureFunction, cleanup, luaWriteBiggerObj),
+                                                 memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            
+            //Console.WriteLine($"py_writeIntBytes =>\n\t{py_writeIntBytes} total bytes for {actions} writes,\n\t{py_writeIntBytes / (double) actions} bytes/write");
+            //Console.WriteLine($"py_writeVector3Bytes =>\n\t{py_writeVector3Bytes} total bytes for {actions} writes,\n\t{py_writeVector3Bytes / (double) actions} bytes/write");
+            //Console.WriteLine($"py_writeTransformBytes =>\n\t{py_writeTransformBytes} total bytes for {actions} writes,\n\t{py_writeTransformBytes / (double) actions} bytes/write");
+            //Console.WriteLine($"py_writeBigObjBytes =>\n\t{py_writeBigObjBytes} total bytes for {actions} writes,\n\t{py_writeBigObjBytes / (double) actions} bytes/write");
+            //Console.WriteLine($"py_writeBiggerObjBytes =>\n\t{py_writeBiggerObjBytes} total bytes for {actions} writes,\n\t{py_writeBiggerObjBytes / (double) actions} bytes/write");
+            
+            Console.WriteLine($"lua_writeIntBytes =>\n\t{lua_writeIntBytes} total bytes for {actions} writes,\n\t{lua_writeIntBytes / (double) actions} bytes/write");
+            Console.WriteLine($"lua_writeVector3Bytes =>\n\t{lua_writeVector3Bytes} total bytes for {actions} writes,\n\t{lua_writeVector3Bytes / (double) actions} bytes/write");
+            Console.WriteLine($"lua_writeTransformBytes =>\n\t{lua_writeTransformBytes} total bytes for {actions} writes,\n\t{lua_writeTransformBytes / (double) actions} bytes/write");
+            Console.WriteLine($"lua_writeBigObjBytes =>\n\t{lua_writeBigObjBytes} total bytes for {actions} writes,\n\t{lua_writeBigObjBytes / (double) actions} bytes/write");
+            Console.WriteLine($"lua_writeBiggerObjBytes =>\n\t{lua_writeBiggerObjBytes} total bytes for {actions} writes,\n\t{lua_writeBiggerObjBytes / (double) actions} bytes/write");
         }
 
         internal static void MeasureBasic() {
@@ -76,6 +104,10 @@ namespace Measurements {
             var pythonWrite = new Action<PyScope, int>((scope, idx) => {
                 scope.Set("a", idx);
             });
+            
+            var luaWrite = new Action<NLua.Lua, int>((scope, idx) => {
+                scope.SetObjectToPath("a", idx);
+            });
 
             var actions = 65536;
             var py_writeNormalMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup, pythonInitialize, pythonWrite), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
@@ -84,8 +116,8 @@ namespace Measurements {
             var py_readNormalMemory = Measure(1, (func, cleanup) => PythonProgram.ReadMem(actions, func, cleanup), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
             var py_readCleanupMemory = Measure(1, (func, cleanup) => PythonProgram.ReadMem(actions, func, cleanup), memoryCleanup, memoryCleanup,
                                                GC.GetAllocatedBytesForCurrentThread)[0];
-            var lua_writeNormalMemory = Measure(1, (func, cleanup) => LuaProgram.WriteMem(actions, func, cleanup), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
-            var lua_writeCleanupMemory = Measure(1, (func, cleanup) => LuaProgram.WriteMem(actions, func, cleanup), memoryCleanup, memoryCleanup,
+            var lua_writeNormalMemory = Measure(1, (func, cleanup) => LuaProgram.WriteMem(actions, func, cleanup, luaWrite), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            var lua_writeCleanupMemory = Measure(1, (func, cleanup) => LuaProgram.WriteMem(actions, func, cleanup, luaWrite), memoryCleanup, memoryCleanup,
                                                  GC.GetAllocatedBytesForCurrentThread)[0];
             var lua_readNormalMemory = Measure(1, (func, cleanup) => LuaProgram.ReadMem(actions, func, cleanup), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
             var lua_readCleanupMemory = Measure(1, (func, cleanup) => LuaProgram.ReadMem(actions, func, cleanup), memoryCleanup, memoryCleanup,
@@ -94,7 +126,7 @@ namespace Measurements {
             var sampleCount = 512;
             var py_writeNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.WriteTime(actions, func, action, pythonInitialize, pythonWrite), memoryCleanup, null, () => DateTime.Now);
             var py_readNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
-            var lua_writeNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var lua_writeNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.WriteTime(actions, func, action, luaWrite), memoryCleanup, null, () => DateTime.Now);
             var lua_readNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
 
             var py_writeNormalTime = Process(py_writeNormalTimeSamples);

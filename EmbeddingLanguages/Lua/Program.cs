@@ -5,12 +5,14 @@ namespace Lua {
         public static void Main() {
         }
 
-        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction) {
+        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction, Action<NLua.Lua, int> write) {
             long start, end;
             using (var lua = new NLua.Lua()) {
                 cleanupFunction?.Invoke();
                 start = measureFunction();
-                Write(writes, lua);
+                for (var i = 0; i < writes; i++) {
+                    write?.Invoke(lua, i);
+                }
                 cleanupFunction?.Invoke();
                 end = measureFunction();
             }
@@ -18,12 +20,14 @@ namespace Lua {
             return end - start;
         }
         
-        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction) {
+        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction, Action<NLua.Lua, int> write) {
             DateTime start, end;
             using (var lua = new NLua.Lua()) {
                 cleanupFunction?.Invoke();
                 start = measureFunction();
-                Write(writes, lua);
+                for (var i = 0; i < writes; i++) {
+                    write?.Invoke(lua, i);
+                }
                 cleanupFunction?.Invoke();
                 end = measureFunction();
             }
