@@ -6,6 +6,7 @@ using Embedded.Data;
 using Lua;
 using Python;
 using Python.Runtime;
+using UnityCommons;
 using UnityEngine;
 
 namespace Measurements {
@@ -19,7 +20,87 @@ namespace Measurements {
         static void Main(string[] args) {
             PythonProgram.Initialize();
             // CompareComplexMemory();
-            CompareComplexPerformance();
+            // CompareComplexPerformance();
+            CompareFunctionCalls();
+        }
+
+        internal static void CompareFunctionCalls() {
+            using (var luaState = new NLua.Lua()) {
+                luaState.DoString(@"
+function add(a, b)
+    return a + b
+end
+");
+                LuaFuncCalls(luaState);
+            }
+
+            using (Py.GIL()) {
+                using var pythonScope = Py.CreateScope();
+                pythonScope.Exec(@"
+def add(a, b):
+    return a + b
+");
+                PythonFuncCalls(pythonScope);
+            }
+        }
+
+        internal static void LuaFuncCalls(NLua.Lua state) {
+            var memoryCleanup = new Action(() => {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            });
+            var func = state.GetFunction("add");
+            
+            const int sampleCount = 64, actionCount = 1000000;
+            var samples = Measure(sampleCount, (measure, _) => {
+                var start = measure();
+                for (var i = 0; i < actionCount; i++) {
+                    var result = (long)func.Call(Rand.Int, Rand.Int)[0];
+                }
+                var end = measure();
+                return (end.Item1 - start.Item1, end.Item2 - start.Item2);
+            }, memoryCleanup, null, () => (DateTime.Now, GC.GetAllocatedBytesForCurrentThread()));
+            
+            var sumTime = TimeSpan.Zero;
+            var sumMemory = 0ul;
+            for (var i = 0; i < sampleCount; i++) {
+                sumTime += samples[i].Item1;
+                sumMemory += (ulong) samples[i].Item2;
+            }
+
+            var avgMemory = sumMemory / (double) sampleCount;
+            var avgTime = sumTime / sampleCount;
+            Console.WriteLine($"Lua Function Calls:\n{avgMemory} bytes for {actionCount} calls\n{avgMemory / actionCount} bytes per call\n{avgTime.TotalMilliseconds} ms for {actionCount} calls\n{(avgTime / actionCount).TotalMilliseconds} ms per call");
+
+        }
+
+        internal static void PythonFuncCalls(PyScope scope) {
+            var memoryCleanup = new Action(() => {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            });
+            var func = scope.Get("add");
+            
+            const int sampleCount = 64, actionCount = 1000000;
+            var samples = Measure(sampleCount, (measure, _) => {
+                var start = measure();
+                for (var i = 0; i < actionCount; i++) {
+                    var result = func.Invoke(Rand.Int.ToPython(), Rand.Int.ToPython()).As<long>();
+                }
+                var end = measure();
+                return (end.Item1 - start.Item1, end.Item2 - start.Item2);
+            }, memoryCleanup, null, () => ( DateTime.Now, GC.GetAllocatedBytesForCurrentThread()));
+            
+            var sumTime = TimeSpan.Zero;
+            var sumMemory = 0ul;
+            for (var i = 0; i < sampleCount; i++) {
+                sumTime += samples[i].Item1;
+                sumMemory += (ulong) samples[i].Item2;
+            }
+
+            var avgMemory = sumMemory / (double) sampleCount;
+            var avgTime = sumTime / sampleCount;
+            Console.WriteLine($"Python Function Calls:\n{avgMemory} bytes for {actionCount} calls\n{avgMemory / actionCount} bytes per call\n{avgTime.TotalMilliseconds} ms for {actionCount} calls\n{(avgTime / actionCount).TotalMilliseconds} ms per call");
         }
 
         internal static void CompareComplexPerformance() {
@@ -256,10 +337,12 @@ namespace Measurements {
                 cleanupFunctionSelf();
                 samples.Add(function(measureFunction, cleanupFunction));
                 var time = DateTime.Now - start;
-                var percentCompleted = ((i+1) / (double) sampleCount);
+                var percentCompleted = ((i + 1) / (double) sampleCount);
                 var remaining = ((1 - percentCompleted) / percentCompleted) * time;
-                Console.Title = $"{funcName}: {100 * i / (double) sampleCount:F2}% complete - elapsed: {time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}; remaining: {remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
+                Console.Title =
+                    $"{funcName}: {100 * i / (double) sampleCount:F2}% complete - elapsed: {time.Hours:00}:{time.Minutes:00}:{time.Seconds:00}; remaining: {remaining.Hours:00}:{remaining.Minutes:00}:{remaining.Seconds:00}";
             }
+
             return samples;
         }
     }
