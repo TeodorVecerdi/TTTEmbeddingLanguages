@@ -1,62 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Embedded;
-using Embedded.Components;
+using Embedded.Data;
 using Lua;
 using Python;
 using Python.Runtime;
+using UnityEngine;
 
 namespace Measurements {
     class Program {
+        static IEnumerable<int> Range(int start, int end) {
+            for (var i = start; i < end; i++) {
+                yield return i;
+            }
+        }
+        
         static void Main(string[] args) {
+            // var size = sizeof(float) * (9 + 3 * 3) * 3;
+            // Console.WriteLine(size);
             PythonProgram.Initialize();
-            var gameManager = new GameManager();
-            using var gil = Py.GIL();
-            using var scope = Py.Import("pyresources.main");
-            // scope.Exec("import clr");
-            // scope.Exec("clr.AddReference('Shared')");
-            // scope.Set("test", new GameObject().ToPython());
-//             scope.Exec(@"
-// print(test.HasComponent.__class__)
-// ");
-            return;
+            CompareComplex();
+        }
 
-            // int enemyCount = Rand.Range(64, 128), walkerCount = Rand.Range(64, 128), targetFollowCount = Rand.Range(64, 128);
-            int enemyCount = 118, walkerCount = 121, targetFollowCount = 86;
-            Console.WriteLine($"Starting test with {enemyCount} enemies, {walkerCount} walkers, {targetFollowCount} followers");
+        internal static void CompareComplex() {
+            var memoryCleanup = new Action(() => {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            });
+            
+            const int actions = 1048576; // 1<<20
+            var vector = new Vector3(1.0f, 2.0f, 3.0f);
+            var transform = new Transform(new Vector3(1.0f, 2.0f, 3.0f), new Vector3(11.0f, 22.0f, 33.0f), new Vector3(111.0f, 222.0f, 333.0f));
+            var bigObject = new BigObject();
+            var biggerObject = new BiggerObject();
+            
+            var a = Range(0, actions).Select(i => $"a{i}").ToList();
+            var b = Range(0, actions).Select(i => $"b{i}").ToList();
+            var c = Range(0, actions).Select(i => $"c{i}").ToList();
+            var d = Range(0, actions).Select(i => $"d{i}").ToList();
+            var e = Range(0, actions).Select(i => $"e{i}").ToList();
 
-            /*var gameManager = new GameManager();
-            var gameObjects = new List<GameObject>();
-            for (var i = 0; i < enemyCount; i++) {
-                var enemy = new GameObject();
-                enemy.Tag = "Enemy";
-                enemy.AddComponent(new RandomWalk(Rand.Range(1f, 4f), 100));
-                enemy.AddComponent(new TargetFollow(null, Rand.Range(1f, 2f)));
-                enemy.AddComponent(new SphereCollider(Rand.Range(2f, 5f)));
-                enemy.AddComponent(new EnemyAI());
-                gameObjects.Add(enemy);
-            }
-            
-            for (var i = 0; i < walkerCount; i++) {
-                var walker = new GameObject();
-                walker.Tag = "Walker";
-                walker.AddComponent(new RandomWalk(Rand.Range(3f, 5f), 100));
-                walker.AddComponent(new SphereCollider(Rand.Range(1f, 2f)));
-                gameObjects.Add(walker);
-            }
-            
-            for (var i = 0; i < targetFollowCount; i++) {
-                var follower = new GameObject();
-                follower.AddComponent(new TargetFollow(Rand.ListItem(gameObjects), Rand.Range(1f, 2f)));
-            }
-            gameObjects.Clear();
-            
-            gameManager.StartGame();
-            while (true) {
-                gameManager.UpdateGame();
-            }*/
-            PythonProgram.Test1(enemyCount, walkerCount, targetFollowCount);
-            // PythonProgram.Test0(gameObjects);
+            var pythonWriteInt = new Action<PyScope, int>((scope, idx) => scope.Set($"a", idx));
+            var pythonWriteVector3 = new Action<PyScope, int>((scope, idx) => scope.Set($"b", vector));
+            var pythonWriteTransform = new Action<PyScope, int>((scope, idx) => scope.Set($"c", transform));
+            var pythonWriteBigObj = new Action<PyScope, int>((scope, idx) => scope.Set($"d", bigObject));
+            var pythonWriteBiggerObj = new Action<PyScope, int>((scope, idx) => scope.Set($"e", biggerObject));
+
+            var py_writeIntBytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteInt),
+                                           memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            var py_writeVector3Bytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteVector3),
+                                           memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            var py_writeTransformBytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteTransform),
+                                           memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            var py_writeBigObjBytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteBigObj),
+                                                 memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            var py_writeBiggerObjBytes = Measure(1, (measureFunction, cleanup) => PythonProgram.WriteMem(actions, measureFunction, cleanup, null, pythonWriteBiggerObj),
+                                              memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            Console.WriteLine($"py_writeIntBytes =>\n\t{py_writeIntBytes} total bytes for {actions} writes,\n\t{py_writeIntBytes / (double) actions} bytes/write");
+            Console.WriteLine($"py_writeVector3Bytes =>\n\t{py_writeVector3Bytes} total bytes for {actions} writes,\n\t{py_writeVector3Bytes / (double) actions} bytes/write");
+            Console.WriteLine($"py_writeTransformBytes =>\n\t{py_writeTransformBytes} total bytes for {actions} writes,\n\t{py_writeTransformBytes / (double) actions} bytes/write");
+            Console.WriteLine($"py_writeBigObjBytes =>\n\t{py_writeBigObjBytes} total bytes for {actions} writes,\n\t{py_writeBigObjBytes / (double) actions} bytes/write");
+            Console.WriteLine($"py_writeBiggerObjBytes =>\n\t{py_writeBiggerObjBytes} total bytes for {actions} writes,\n\t{py_writeBiggerObjBytes / (double) actions} bytes/write");
+
         }
 
         internal static void MeasureBasic() {
@@ -64,10 +70,16 @@ namespace Measurements {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
             });
+            var pythonInitialize = new Action<PyScope>(scope => {
+                scope.Exec("a = None");
+            });
+            var pythonWrite = new Action<PyScope, int>((scope, idx) => {
+                scope.Set("a", idx);
+            });
 
             var actions = 65536;
-            var py_writeNormalMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
-            var py_writeCleanupMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup), memoryCleanup, memoryCleanup,
+            var py_writeNormalMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup, pythonInitialize, pythonWrite), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
+            var py_writeCleanupMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup, pythonInitialize, pythonWrite), memoryCleanup, memoryCleanup,
                                                 GC.GetAllocatedBytesForCurrentThread)[0];
             var py_readNormalMemory = Measure(1, (func, cleanup) => PythonProgram.ReadMem(actions, func, cleanup), memoryCleanup, null, GC.GetAllocatedBytesForCurrentThread)[0];
             var py_readCleanupMemory = Measure(1, (func, cleanup) => PythonProgram.ReadMem(actions, func, cleanup), memoryCleanup, memoryCleanup,
@@ -80,7 +92,7 @@ namespace Measurements {
                                                 GC.GetAllocatedBytesForCurrentThread)[0];
 
             var sampleCount = 512;
-            var py_writeNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
+            var py_writeNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.WriteTime(actions, func, action, pythonInitialize, pythonWrite), memoryCleanup, null, () => DateTime.Now);
             var py_readNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
             var lua_writeNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.WriteTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);
             var lua_readNormalTimeSamples = Measure(sampleCount, (func, action) => LuaProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);

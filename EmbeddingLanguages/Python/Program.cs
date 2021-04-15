@@ -12,14 +12,16 @@ namespace Python {
             Runtime.Runtime.PythonDLL = "python39.dll";
         }
         
-        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction) {
+        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction, Action<PyScope> initialize, Action<PyScope, int> write) {
             long start, end;
             using (var state = Py.GIL()) {
                 using (var scope = Py.CreateScope()) {
-                    scope.Exec("a = None");
+                    initialize?.Invoke(scope);
                     cleanupFunction?.Invoke();
                     start = measureFunction();
-                    Write(writes, scope);
+                    for (var i = 0; i < writes; i++) {
+                        write?.Invoke(scope, i);
+                    }
                     cleanupFunction?.Invoke();
                     end = measureFunction();
                 }
@@ -27,14 +29,16 @@ namespace Python {
             return end - start;
         }
         
-        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction) {
+        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction, Action<PyScope> initialize, Action<PyScope, int> write) {
             DateTime start, end;
-            using (var state = Py.GIL()) {
+            using (var _ = Py.GIL()) {
                 using (var scope = Py.CreateScope()) {
-                    scope.Exec("a = None");
+                    initialize?.Invoke(scope);
                     cleanupFunction?.Invoke();
                     start = measureFunction();
-                    Write(writes, scope);
+                    for (var i = 0; i < writes; i++) {
+                        write?.Invoke(scope, i);
+                    }
                     cleanupFunction?.Invoke();
                     end = measureFunction();
                 }

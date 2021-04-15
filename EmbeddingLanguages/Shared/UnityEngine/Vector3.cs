@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 namespace UnityEngine {
     // Representation of 3D vectors and points.
     [StructLayout(LayoutKind.Sequential)]
-    public class Vector3 : IEquatable<Vector3>, IFormattable {
+    public struct Vector3 : IEquatable<Vector3>, IFormattable {
         // *Undocumented*
         public const float kEpsilon = 0.00001F;
         // *Undocumented*

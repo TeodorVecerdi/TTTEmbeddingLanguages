@@ -1,19 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Embedded.Components;
 using Embedded.Data;
-using UnityEngine;
+using UnityCommons;
+using Vector3 = UnityEngine.Vector3;
 
 // ReSharper disable CheckNamespace
 namespace Embedded {
+    public class BigObject {
+        public Transform Transform1;
+        public Transform Transform2;
+        public Transform Transform3;
+        public Vector3 Vector11;
+        public Vector3 Vector21;
+        public Vector3 Vector31;
+        public Vector3 Vector12;
+        public Vector3 Vector22;
+        public Vector3 Vector32;
+        public Vector3 Vector13;
+        public Vector3 Vector23;
+        public Vector3 Vector33;
+
+        public BigObject() {
+            Vector11 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector21 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector31 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector12 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector22 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector32 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector13 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector23 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector33 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Transform1 = new Transform(new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float));
+            Transform2 = new Transform(new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float));
+            Transform3 = new Transform(new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float));
+        }
+    }
+
+    public class BiggerObject {
+        public Vector3[] Vectors;
+
+        public BiggerObject() {
+            const int count = 83333; // 2^16 + 2^14 + 1413 Vector3's => 249999 floats ~= 1MB
+            Vectors = new Vector3[count];
+            for (var i = 0; i < count; i++) {
+                Vectors[i] = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            }
+
+            Console.WriteLine($"{Vectors.Length} vectors = {Vectors.Length * 3} floats = {Vectors.Length * 3 * sizeof(float)} bytes");
+        }
+    }
+
     namespace Data {
-        public class Transform {
+        public struct Transform {
             public Vector3 Position;
             public Vector3 Scale;
             public Vector3 EulerAngles;
 
-            public Transform() : this(new Vector3(0, 0, 0), new Vector3(1, 1, 1), new Vector3(0, 0, 0)) {
+            public Transform(int a = 0) : this(new Vector3(0, 0, 0), new Vector3(1, 1, 1), new Vector3(0, 0, 0)) {
             }
 
             /// <summary>Initializes a new instance of the <see cref="T:System.Object" /> class.</summary>
@@ -33,10 +85,10 @@ namespace Embedded {
 
     public class GameObject {
         private static int instanceCount = 0;
-        private readonly Transform transform = new();
+        private Transform transform;
         private readonly List<Component> components = new();
         private bool isDestroying;
-        
+
         public string Name;
         public string Tag;
 
@@ -65,7 +117,7 @@ namespace Embedded {
 
             GameManager.Instance.Register(this);
         }
-        
+
         public void Awake() {
             foreach (var component in components) {
                 component.OnAwake();
@@ -118,13 +170,13 @@ namespace Embedded {
         public T GetComponent<T>() where T : Component {
             return components.FirstOrDefault(component => component is T) as T;
         }
-        
+
         public IEnumerable<T> GetComponents<T>() where T : Component {
             return components.OfType<T>();
         }
 
         public static void Destroy(GameObject gameObject) {
-            if(gameObject.isDestroying) return;
+            if (gameObject.isDestroying) return;
             gameObject.isDestroying = true;
             GameManager.Instance.QueueDestroy(gameObject);
         }
@@ -140,16 +192,28 @@ namespace Embedded {
 
     public abstract class Component {
         public GameObject Owner;
-        
-        public virtual void OnAwake() {}
-        public virtual void OnStart() {}
-        public virtual void OnUpdate(float delta) {}
-        public virtual void OnDestroy() {}
-        
-        public virtual void OnCollisionEnter(GameObject other) {}
-        public virtual void OnCollisionStay(GameObject other) {}
-        public virtual void OnCollisionExit(GameObject other) {}
-        
+
+        public virtual void OnAwake() {
+        }
+
+        public virtual void OnStart() {
+        }
+
+        public virtual void OnUpdate(float delta) {
+        }
+
+        public virtual void OnDestroy() {
+        }
+
+        public virtual void OnCollisionEnter(GameObject other) {
+        }
+
+        public virtual void OnCollisionStay(GameObject other) {
+        }
+
+        public virtual void OnCollisionExit(GameObject other) {
+        }
+
         public static void Destroy(GameObject gameObject) => GameObject.Destroy(gameObject);
         public static GameObject FindGameObject(string name) => GameManager.Instance.FindGameObject(name);
     }
