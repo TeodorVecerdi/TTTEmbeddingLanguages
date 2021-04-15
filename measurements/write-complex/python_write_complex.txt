@@ -1,0 +1,55 @@
+SINGLE VARIABLE
+py_writeIntBytes =>
+        50337768 total bytes for 1048576 writes,
+        48.005836486816406 bytes/write
+py_writeVector3Bytes =>
+        570737048 total bytes for 1048576 writes,
+        544.2972640991211 bytes/write
+py_writeTransformBytes =>
+        604030376 total bytes for 1048576 writes,
+        576.0482559204102 bytes/write
+py_writeBigObjBytes =>
+        528528216 total bytes for 1048576 writes,
+        504.04378509521484 bytes/write
+py_writeBiggerObjBytes =>
+        536903368 total bytes for 1048576 writes,
+        512.0309524536133 bytes/write
+
+
+		
+MULTIPLE VARIABLES
+py_writeIntBytes =>
+        117367824 total bytes for 1048576 writes,
+        111.93067932128906 bytes/write
+py_writeVector3Bytes =>
+        713240432 total bytes for 1048576 writes,
+        680.1990814208984 bytes/write
+py_writeTransformBytes =>
+        671109056 total bytes for 1048576 writes,
+        640.0194702148438 bytes/write
+py_writeBigObjBytes =>
+        595605472 total bytes for 1048576 writes,
+        568.0136413574219 bytes/write
+py_writeBiggerObjBytes =>
+        603980624 total bytes for 1048576 writes,
+        576.0008087158203 bytes/write
+
+ 
+
+PRE-ALOCATED string keys for variables
+py_writeIntBytes =>
+        50337744 total bytes for 1048576 writes,
+        48.00581359863281 bytes/write
+py_writeVector3Bytes =>
+        646170984 total bytes for 1048576 writes,
+        616.2366714477539 bytes/write
+py_writeTransformBytes =>
+        604031776 total bytes for 1048576 writes,
+        576.0495910644531 bytes/write
+py_writeBigObjBytes =>
+        528528904 total bytes for 1048576 writes,
+        504.04444122314453 bytes/write
+py_writeBiggerObjBytes =>
+        536928264 total bytes for 1048576 writes,
+        512.0546951293945 bytes/write
+
