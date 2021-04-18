@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Embedded;
 using Python.Runtime;
 
 namespace Python {
@@ -11,14 +12,15 @@ namespace Python {
             Runtime.Runtime.PythonDLL = "python39.dll";
         }
         
-        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction) {
+        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction, Action<PyScope, int> write) {
             long start, end;
             using (var state = Py.GIL()) {
                 using (var scope = Py.CreateScope()) {
-                    scope.Exec("a = None");
                     cleanupFunction?.Invoke();
                     start = measureFunction();
-                    Write(writes, scope);
+                    for (var i = 0; i < writes; i++) {
+                        write?.Invoke(scope, i);
+                    }
                     cleanupFunction?.Invoke();
                     end = measureFunction();
                 }
@@ -26,14 +28,15 @@ namespace Python {
             return end - start;
         }
         
-        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction) {
+        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction, Action<PyScope, int> write) {
             DateTime start, end;
-            using (var state = Py.GIL()) {
+            using (var _ = Py.GIL()) {
                 using (var scope = Py.CreateScope()) {
-                    scope.Exec("a = None");
                     cleanupFunction?.Invoke();
                     start = measureFunction();
-                    Write(writes, scope);
+                    for (var i = 0; i < writes; i++) {
+                        write?.Invoke(scope, i);
+                    }
                     cleanupFunction?.Invoke();
                     end = measureFunction();
                 }
@@ -92,6 +95,25 @@ namespace Python {
             for (int i = 0; i < reads; i++) {
                 // a = scope.Eval<int>("a");
                 a = scope.Get<int>("a");
+            }
+        }
+
+        public static void Test0(List<GameObject> gameObjects) {
+            using var gil = Py.GIL();
+            using dynamic scope = Py.Import("pyresources.main");
+            scope.load(gameObjects);
+        }
+
+        public static void Test1(int enemyCount, int walkerCount, int followerCount) {
+            using var gil = Py.GIL();
+            using dynamic scope = Py.Import("pyresources.main");
+            scope.initialize_systems();
+            scope.initialize_game(enemyCount, walkerCount, followerCount);
+
+            scope.start_game();
+            
+            while (true) {
+                scope.run();
             }
         }
     }

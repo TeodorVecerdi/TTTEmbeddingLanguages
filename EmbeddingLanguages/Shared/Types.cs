@@ -1,57 +1,71 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using Embedded.Components;
 using Embedded.Data;
+using UnityCommons;
+using Vector3 = UnityEngine.Vector3;
 
 // ReSharper disable CheckNamespace
 namespace Embedded {
-    namespace Data {
-        public struct Vector3 {
-            public float X;
-            public float Y;
-            public float Z;
-            
-            public Vector3(float value) : this(value, value, value) {
-            }
+    public class BigObject {
+        public Transform Transform1;
+        public Transform Transform2;
+        public Transform Transform3;
+        public Vector3 Vector11;
+        public Vector3 Vector21;
+        public Vector3 Vector31;
+        public Vector3 Vector12;
+        public Vector3 Vector22;
+        public Vector3 Vector32;
+        public Vector3 Vector13;
+        public Vector3 Vector23;
+        public Vector3 Vector33;
 
-            public Vector3(float x, float y, float z) {
-                X = x;
-                Y = y;
-                Z = z;
-            }
-
-            public static Vector3 operator +(Vector3 first, Vector3 second) {
-                return new(first.X + second.X, first.Y + second.Y, first.Z + second.Z);
-            }
-
-            public static Vector3 operator -(Vector3 first, Vector3 second) {
-                return new(first.X - second.X, first.Y - second.Y, first.Z - second.Z);
-            }
-
-            public static Vector3 operator *(Vector3 first, Vector3 second) {
-                return new(first.X * second.X, first.Y * second.Y, first.Z * second.Z);
-            }
-
-            public static Vector3 operator *(Vector3 first, float second) {
-                return new(first.X * second, first.Y * second, first.Z * second);
-            }
-
-            public override string ToString() {
-                return $"[{X}, {Y}, {Z}]";
-            }
-
-            public void Deconstruct(out float x, out float y, out float z) {
-                x = X;
-                y = Y;
-                z = Z;
-            }
+        public BigObject() {
+            Vector11 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector21 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector31 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector12 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector22 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector32 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector13 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector23 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Vector33 = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            Transform1 = new Transform(new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float));
+            Transform2 = new Transform(new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float));
+            Transform3 = new Transform(new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float),
+                                       new Vector3(Rand.Float, Rand.Float, Rand.Float));
         }
-        public class Transform {
+    }
+
+    public class BiggerObject {
+        public Vector3[] Vectors;
+
+        public BiggerObject() {
+            const int count = 83333; // 2^16 + 2^14 + 1413 Vector3's => 249999 floats ~= 1MB
+            Vectors = new Vector3[count];
+            for (var i = 0; i < count; i++) {
+                Vectors[i] = new Vector3(Rand.Float, Rand.Float, Rand.Float);
+            }
+
+            Console.WriteLine($"{Vectors.Length} vectors = {Vectors.Length * 3} floats = {Vectors.Length * 3 * sizeof(float)} bytes");
+        }
+    }
+
+    namespace Data {
+        public struct Transform {
             public Vector3 Position;
             public Vector3 Scale;
             public Vector3 EulerAngles;
 
-            public Transform() : this(new Vector3(0), new Vector3(1), new Vector3(0)) {
+            public Transform(int a = 0) : this(new Vector3(0, 0, 0), new Vector3(1, 1, 1), new Vector3(0, 0, 0)) {
             }
 
             /// <summary>Initializes a new instance of the <see cref="T:System.Object" /> class.</summary>
@@ -68,82 +82,140 @@ namespace Embedded {
             }
         }
     }
-    namespace GameObject {
-        public class GameObject {
-            private static int instanceCount = 0;
-            private readonly Transform transform = new();
-            private readonly List<Component> components = new();
-            public string Name;
 
-            public Vector3 Position {
-                get => transform.Position;
-                set => transform.Position = value;
-            }
-            public Vector3 Scale {
-                get => transform.Scale;
-                set => transform.Scale = value;
-            }
-            public Vector3 EulerAngles {
-                get => transform.EulerAngles;
-                set => transform.EulerAngles = value;
-            }
+    public class GameObject {
+        private static int instanceCount = 0;
+        private Transform transform;
+        private readonly List<Component> components = new();
+        private bool isDestroying;
 
-            public GameObject() : this($"{nameof(GameObject)}_{instanceCount}"){
-            }
+        public string Name;
+        public string Tag;
 
-            private GameObject(string name) {
-                Name = name;
-                instanceCount++;
-            }
+        public List<Component> Components => components;
 
-            public void Start() {
-                foreach (var component in components) {
-                    component.OnStart();
-                }
-            }
+        public Vector3 Position {
+            get => transform.Position;
+            set => transform.Position = value;
+        }
+        public Vector3 Scale {
+            get => transform.Scale;
+            set => transform.Scale = value;
+        }
+        public Vector3 EulerAngles {
+            get => transform.EulerAngles;
+            set => transform.EulerAngles = value;
+        }
 
-            public void Update(float delta) {
-                foreach (var component in components) {
-                    component.OnUpdate(delta);
-                }
-            }
+        public GameObject() : this($"{nameof(GameObject)}_{instanceCount}", "Object") {
+        }
 
-            public void AddComponent<T>(T component) where T : Component {
-                component.Owner = this;
-                components.Add(component);
-            }
+        private GameObject(string name, string tag) {
+            Name = name;
+            Tag = tag;
+            instanceCount++;
 
-            public void RemoveComponent<T>(T component) where T : Component {
-                if (!components.Remove(component)) return;
-                component.Owner = null;
-            }
+            GameManager.Instance.Register(this);
+        }
 
-            public bool HasComponent<T>() where T : Component {
-                return components.Any(component => component is T);
-            }
-
-            public T GetComponent<T>() where T : Component {
-                return components.First(component => component is T) as T;
-            }
-
-            /// <summary>Returns a string that represents the current object.</summary>
-            /// <returns>A string that represents the current object.</returns>
-            public override string ToString() {
-                return $"{Name}:\n{transform}";
+        public void Awake() {
+            foreach (var component in components) {
+                component.OnAwake();
             }
         }
-        
-        public abstract class Component {
-            public GameObject Owner;
 
-            public virtual void OnStart() {
-                Console.WriteLine("Component::OnStart");
-            }
-
-            public virtual void OnUpdate(float delta) {
-                Console.WriteLine("Component::OnUpdate");
+        public void Start() {
+            foreach (var component in components) {
+                component.OnStart();
             }
         }
+
+        public void Update(float delta) {
+            foreach (var component in components) {
+                component.OnUpdate(delta);
+            }
+        }
+
+        public void Destroy() {
+            foreach (var component in components) {
+                component.OnDestroy();
+            }
+        }
+
+        public void AddComponent<T>(T component) where T : Component {
+            component.Owner = this;
+            components.Add(component);
+
+            if (typeof(T) == typeof(SphereCollider)) {
+                CollisionManager.Register(this, component as SphereCollider);
+            }
+
+            if (GameManager.Instance.GameStarted) {
+                GameManager.Instance.QueueComponentInitialization(component);
+            }
+        }
+
+        public void RemoveComponent<T>(T component) where T : Component {
+            if (!components.Remove(component)) return;
+            component.Owner = null;
+            if (typeof(T) == typeof(SphereCollider)) {
+                CollisionManager.Deregister(this, component as SphereCollider);
+            }
+        }
+
+        public bool HasComponent<T>() where T : Component {
+            return components.Any(component => component is T);
+        }
+
+        public T GetComponent<T>() where T : Component {
+            return components.FirstOrDefault(component => component is T) as T;
+        }
+
+        public IEnumerable<T> GetComponents<T>() where T : Component {
+            return components.OfType<T>();
+        }
+
+        public static void Destroy(GameObject gameObject) {
+            if (gameObject.isDestroying) return;
+            gameObject.isDestroying = true;
+            GameManager.Instance.QueueDestroy(gameObject);
+        }
+
+        public static GameObject FindGameObject(string name) => GameManager.Instance.FindGameObject(name);
+
+        /// <summary>Returns a string that represents the current object.</summary>
+        /// <returns>A string that represents the current object.</returns>
+        public override string ToString() {
+            return $"{Name}:\n{transform}";
+        }
+    }
+
+    public abstract class Component {
+        public GameObject Owner;
+
+        public virtual void OnAwake() {
+        }
+
+        public virtual void OnStart() {
+        }
+
+        public virtual void OnUpdate(float delta) {
+        }
+
+        public virtual void OnDestroy() {
+        }
+
+        public virtual void OnCollisionEnter(GameObject other) {
+        }
+
+        public virtual void OnCollisionStay(GameObject other) {
+        }
+
+        public virtual void OnCollisionExit(GameObject other) {
+        }
+
+        public static void Destroy(GameObject gameObject) => GameObject.Destroy(gameObject);
+        public static GameObject FindGameObject(string name) => GameManager.Instance.FindGameObject(name);
     }
 
     namespace Helper {

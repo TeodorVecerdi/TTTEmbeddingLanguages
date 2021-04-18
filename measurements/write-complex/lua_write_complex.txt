@@ -1,0 +1,50 @@
+SINGLE VARIABLE
+lua_writeIntBytes =>
+        722248 total bytes for 4096 writes,
+        176.330078125 bytes/write
+lua_writeVector3Bytes =>
+        1666800 total bytes for 4096 writes,
+        406.93359375 bytes/write
+lua_writeTransformBytes =>
+        1778024 total bytes for 4096 writes,
+        434.087890625 bytes/write
+lua_writeBigObjBytes =>
+        5711896 total bytes for 4096 writes,
+        1394.505859375 bytes/write
+lua_writeBiggerObjBytes =>
+        27794256 total bytes for 4096 writes,
+        6785.70703125 bytes/write
+
+MULTIPLE VARIABLES
+lua_writeIntBytes =>
+        1017312 total bytes for 4096 writes,
+        248.3671875 bytes/write
+lua_writeVector3Bytes =>
+        2310816 total bytes for 4096 writes,
+        564.1640625 bytes/write
+lua_writeTransformBytes =>
+        2422296 total bytes for 4096 writes,
+        591.380859375 bytes/write
+lua_writeBigObjBytes =>
+        6262224 total bytes for 4096 writes,
+        1528.86328125 bytes/write
+lua_writeBiggerObjBytes =>
+        29075776 total bytes for 4096 writes,
+        7098.578125 bytes/write
+
+PREALLOC KEYS
+lua_writeIntBytes =>
+        787936 total bytes for 4096 writes,
+        192.3671875 bytes/write
+lua_writeVector3Bytes =>
+        2081440 total bytes for 4096 writes,
+        508.1640625 bytes/write
+lua_writeTransformBytes =>
+        2192920 total bytes for 4096 writes,
+        535.380859375 bytes/write
+lua_writeBigObjBytes =>
+        6039040 total bytes for 4096 writes,
+        1474.375 bytes/write
+lua_writeBiggerObjBytes =>
+        28814136 total bytes for 4096 writes,
+        7034.701171875 bytes/write
