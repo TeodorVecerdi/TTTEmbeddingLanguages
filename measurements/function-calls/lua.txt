@@ -1,0 +1,4 @@
+232000012.625 bytes for 1000000 calls
+232.000012625 bytes per call
+212.4545 ms for 1000000 calls
+0.0002 ms per call

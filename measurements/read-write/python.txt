@@ -1,0 +1,50 @@
+using
+scope.Set("key", value);
+variable = scope.Get<T>("key")
+
+py_writeNormalMemory =>
+    3150720 total bytes for 65536 writes,
+    48.076171875 bytes/write
+py_writeCleanupMemory =>
+    3146072 total bytes for 65536 writes,
+    48.0052490234375 bytes/write
+py_readNormalMemory =>
+    4718744 total bytes for 65536 reads,
+    72.0023193359375 bytes/read
+py_readCleanupMemory =>
+    4718792 total bytes for 65536 reads,
+    72.0030517578125 bytes/read
+py_writeNormalTime for 65536 writes =>
+    Min: 8.1766ms
+    Max: 16.4533ms
+    Avg (over 512 samples): 8.8413ms
+py_readNormalTime for 65536 reads =>
+    Min: 15.486ms
+    Max: 29.0052ms
+    Avg (over 512 samples): 18.3396ms
+
+
+using
+scope.Exec($"key = {value}");
+variable = scope.Eval<T>("key")
+
+py_writeNormalMemory =>
+    6735704 total bytes for 65536 writes,
+    102.7786865234375 bytes/write
+py_writeCleanupMemory =>
+    6735664 total bytes for 65536 writes,
+    102.778076171875 bytes/write
+py_readNormalMemory =>
+    5243928 total bytes for 65536 reads,
+    80.0159912109375 bytes/read
+py_readCleanupMemory =>
+    5243080 total bytes for 65536 reads,
+    80.0030517578125 bytes/read
+py_writeNormalTime for 65536 writes =>
+    Min: 435.2603ms
+    Max: 527.7544ms
+    Avg (over 32 samples): 450.5397ms
+py_readNormalTime for 65536 reads =>
+    Min: 308.1773ms
+    Max: 320.7622ms
+    Avg (over 32 samples): 313.4938ms

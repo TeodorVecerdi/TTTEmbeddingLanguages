@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Lua\Lua.csproj" />
+      <ProjectReference Include="..\Python\Python.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PyResFolder Include="..\Python\resources\**" Exclude="..\Python\resources\**\__pycache__;**\*.pyc" Visible="false" />
+    </ItemGroup>
+
+    <Target Name="MoveResources" AfterTargets="PostBuildEvent">
+        <Message Text="+++ Moved resources folder to output directory" Importance="High" />
+        <Copy SourceFiles="@(PyResFolder)" DestinationFiles="@(PyResFolder->'$(OutDir)pyresources\%(RecursiveDir)%(Filename)%(Extension)')" ContinueOnError="false" />
+    </Target>
+
+    <Target Name="RemoveResources" AfterTargets="Clean">
+        <Message Text="+++ Removed resources folder from output directory" Importance="High" />
+        <RemoveDir Directories="$(OutDir)pyresources" />
+        <RemoveDir Directories="$(OutDir)luaresources" />
+        <RemoveDir Directories="$(OutDir)ref" />
+    </Target>
+
+</Project>

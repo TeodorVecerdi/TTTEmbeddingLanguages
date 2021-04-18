@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lua", "Lua\Lua.csproj", "{9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Python", "Python\Python.csproj", "{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Measurements", "Measurements\Measurements.csproj", "{F1DCC801-E852-47C6-8167-D44EA0C93DFD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{070C2F0E-5F82-4C5B-9D5A-09BA08C648A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1DCC801-E852-47C6-8167-D44EA0C93DFD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1DCC801-E852-47C6-8167-D44EA0C93DFD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1DCC801-E852-47C6-8167-D44EA0C93DFD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1DCC801-E852-47C6-8167-D44EA0C93DFD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

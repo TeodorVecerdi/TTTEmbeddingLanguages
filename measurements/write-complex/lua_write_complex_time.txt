@@ -1,0 +1,20 @@
+lua_writeIntTime for 8192 writes =>
+        Min: 164.0302ms
+        Max: 216.9022ms
+        Avg (over 256 samples): 170.9888ms
+lua_writeVector3Time for 8192 writes =>
+        Min: 172.7883ms
+        Max: 185.9199ms
+        Avg (over 256 samples): 178.0017ms
+lua_writeTransformTime for 8192 writes =>
+        Min: 174.7802ms
+        Max: 182.7159ms
+        Avg (over 256 samples): 177.9333ms
+lua_writeBigObjTime for 8192 writes =>
+        Min: 1258.3931ms
+        Max: 1497.4556ms
+        Avg (over 256 samples): 1328.0301ms
+lua_writeBiggerObjTime for 8192 writes =>
+        Min: 4823.5962ms
+        Max: 9588.6668ms
+        Avg (over 256 samples): 5741.0745ms

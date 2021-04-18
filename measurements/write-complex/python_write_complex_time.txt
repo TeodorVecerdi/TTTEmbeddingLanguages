@@ -1,0 +1,20 @@
+py_writeIntTime for 8192 writes =>
+        Min: 1.4049ms
+        Max: 5.0706ms
+        Avg (over 256 samples): 1.7098ms
+py_writeVector3Time for 8192 writes =>
+        Min: 6.7485ms
+        Max: 28.1704ms
+        Avg (over 256 samples): 7.4287ms
+py_writeTransformTime for 8192 writes =>
+        Min: 6.8949ms
+        Max: 9.5693ms
+        Avg (over 256 samples): 7.35ms
+py_writeBigObjTime for 8192 writes =>
+        Min: 6.7311ms
+        Max: 9.7779ms
+        Avg (over 256 samples): 7.2205ms
+py_writeBiggerObjTime for 8192 writes =>
+        Min: 6.7261ms
+        Max: 9.9579ms
+        Avg (over 256 samples): 7.0419ms

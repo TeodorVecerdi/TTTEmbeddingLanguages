@@ -1,43 +1,120 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
+using Embedded;
 using Python.Runtime;
-using Embedded.Data;
-using Embedded.GameObject;
 
 namespace Python {
-    internal static class Program {
+    public static class PythonProgram {
         internal static void Main() {
-            // Set python dll (part of path variable)
-            Runtime.Runtime.PythonDLL = "python39.dll";
+        }
 
-            using (Py.GIL()) {
-                // Load main module
-                using (var scope = Py.Import("resources.main") as PyScope) {
-                    Debug.Assert(scope != null);
-                    // Experiment1(hello);
-                    Experiment_CreateObject(scope);
+        public static void Initialize() {
+            Runtime.Runtime.PythonDLL = "python39.dll";
+        }
+        
+        public static long WriteMem(int writes, Func<long> measureFunction, Action cleanupFunction, Action<PyScope, int> write) {
+            long start, end;
+            using (var state = Py.GIL()) {
+                using (var scope = Py.CreateScope()) {
+                    cleanupFunction?.Invoke();
+                    start = measureFunction();
+                    for (var i = 0; i < writes; i++) {
+                        write?.Invoke(scope, i);
+                    }
+                    cleanupFunction?.Invoke();
+                    end = measureFunction();
                 }
+            }
+            return end - start;
+        }
+        
+        public static TimeSpan WriteTime(int writes, Func<DateTime> measureFunction, Action cleanupFunction, Action<PyScope, int> write) {
+            DateTime start, end;
+            using (var _ = Py.GIL()) {
+                using (var scope = Py.CreateScope()) {
+                    cleanupFunction?.Invoke();
+                    start = measureFunction();
+                    for (var i = 0; i < writes; i++) {
+                        write?.Invoke(scope, i);
+                    }
+                    cleanupFunction?.Invoke();
+                    end = measureFunction();
+                }
+            }
+            return end - start;
+        }
+
+        public static long ReadMem(int reads, Func<long> measureFunction, Action cleanupFunction) {
+            long start, end;
+            var a = 0;
+            using (var state = Py.GIL()) {
+                using (var scope = Py.CreateScope()) {
+                    scope.Exec("a = 1");
+                    cleanupFunction?.Invoke();
+                    start = measureFunction();
+                    Read(reads, ref a, scope);
+                    
+                    cleanupFunction?.Invoke();
+                    end = measureFunction();
+                    
+                    scope.Set("a", a);
+                }
+            }
+
+            return end - start;
+        }
+
+        public static TimeSpan ReadTime(int reads, Func<DateTime> measureFunction, Action cleanupFunction) {
+            DateTime start, end;
+            var a = 0;
+            using (var state = Py.GIL()) {
+                using (var scope = Py.CreateScope()) {
+                    scope.Exec("a = 1");
+                    cleanupFunction?.Invoke();
+                    start = measureFunction();
+                    Read(reads, ref a, scope);
+                    
+                    cleanupFunction?.Invoke();
+                    end = measureFunction();
+                    
+                    scope.Set("a", a);
+                }
+            }
+
+            return end - start;
+        }
+
+        private static void Write(int writes, PyScope scope) {
+            for (int i = 0; i < writes; i++) {
+                // scope.Exec($"a = {i}");
+                scope.Set("a", i);
             }
         }
 
-        private static void Experiment_CreateObject(PyScope scope) {
-            var method = scope.Get("CreateGameObject");
-            var transform = new Transform(
-                new Vector3(1.234f, 2.345f, 3.456f),
-                new Vector3(4.567f, 5.678f, 6.789f),
-                new Vector3(7.890f, 8.901f, 9.012f)
-            );
-            var gameObject = method.Invoke(transform.ToPython()).AsManagedObject(typeof(GameObject));
-            Console.WriteLine(gameObject);
+        private static void Read(int reads, ref int a, PyScope scope) {
+            for (int i = 0; i < reads; i++) {
+                // a = scope.Eval<int>("a");
+                a = scope.Get<int>("a");
+            }
         }
 
-        private static void Experiment1(PyScope scope) {
-            var testComponent = scope.Get("TestComponent");
-            var testSecondComponent = scope.Get("TestSecondComponent");
+        public static void Test0(List<GameObject> gameObjects) {
+            using var gil = Py.GIL();
+            using dynamic scope = Py.Import("pyresources.main");
+            scope.load(gameObjects);
+        }
 
-            scope.Set("first", testComponent.Invoke());
-            scope.Set("second", testSecondComponent.Invoke());
-            scope.Get("run").Invoke();
+        public static void Test1(int enemyCount, int walkerCount, int followerCount) {
+            using var gil = Py.GIL();
+            using dynamic scope = Py.Import("pyresources.main");
+            scope.initialize_systems();
+            scope.initialize_game(enemyCount, walkerCount, followerCount);
+
+            scope.start_game();
+            
+            while (true) {
+                scope.run();
+            }
         }
     }
 }
