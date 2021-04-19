@@ -17,6 +17,11 @@ namespace Measurements {
             }
         }
 
+        private static readonly Action memoryCleanup = () => {
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+        };
+
         static void Main(string[] args) {
             PythonProgram.Initialize();
             // CompareComplexMemory();
@@ -25,15 +30,6 @@ namespace Measurements {
         }
 
         internal static void CompareFunctionCalls() {
-            using (var luaState = new NLua.Lua()) {
-                luaState.DoString(@"
-function add(a, b)
-    return a + b
-end
-");
-                LuaFuncCalls(luaState);
-            }
-
             using (Py.GIL()) {
                 using var pythonScope = Py.CreateScope();
                 pythonScope.Exec(@"
@@ -42,13 +38,18 @@ def add(a, b):
 ");
                 PythonFuncCalls(pythonScope);
             }
+
+            using (var luaState = new NLua.Lua()) {
+                luaState.DoString(@"
+function add(a, b)
+    return a + b
+end
+");
+                LuaFuncCalls(luaState);
+            }
         }
 
         internal static void LuaFuncCalls(NLua.Lua state) {
-            var memoryCleanup = new Action(() => {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            });
             var func = state.GetFunction("add");
             
             const int sampleCount = 64, actionCount = 1000000;
@@ -75,10 +76,6 @@ def add(a, b):
         }
 
         internal static void PythonFuncCalls(PyScope scope) {
-            var memoryCleanup = new Action(() => {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            });
             var func = scope.Get("add");
             
             const int sampleCount = 64, actionCount = 1000000;
@@ -104,10 +101,6 @@ def add(a, b):
         }
 
         internal static void CompareComplexPerformance() {
-            var memoryCleanup = new Action(() => {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            });
             const int actions = 8192;
             const int sampleCount = 256;
             var vector = new Vector3(1.0f, 2.0f, 3.0f); // 12 Bytes
@@ -115,7 +108,7 @@ def add(a, b):
                                           new Vector3(11.0f, 22.0f, 33.0f),
                                           new Vector3(111.0f, 222.0f, 333.0f)); // 36 Bytes
             var bigObject = new BigObject(); // 216 Bytes
-            var biggerObject = new BiggerObject(); // 1 MB
+            var biggerObject = new BiggerObject(); // 4 MB
 
             var keysA = Range(0, actions).Select(i => $"a{i}").ToList();
             var keysB = Range(0, actions).Select(i => $"b{i}").ToList();
@@ -190,13 +183,8 @@ def add(a, b):
         }
 
         internal static void CompareComplexMemory() {
-            var memoryCleanup = new Action(() => {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            });
-
             // const int actions = 1048576; // 1<<20
-            const int actions = 16384; // 1<<14
+            const int actions = 16384;
             var vector = new Vector3(1.0f, 2.0f, 3.0f);
             var transform = new Transform(new Vector3(1.0f, 2.0f, 3.0f), new Vector3(11.0f, 22.0f, 33.0f), new Vector3(111.0f, 222.0f, 333.0f));
             var bigObject = new BigObject();
@@ -208,11 +196,11 @@ def add(a, b):
             var d = Range(0, actions).Select(i => $"d{i}").ToList();
             var e = Range(0, actions).Select(i => $"e{i}").ToList();
 
-            var pythonWriteInt = new Action<PyScope, int>((scope, idx) => scope.Set($"a", idx));
-            var pythonWriteVector3 = new Action<PyScope, int>((scope, idx) => scope.Set($"b", vector));
-            var pythonWriteTransform = new Action<PyScope, int>((scope, idx) => scope.Set($"c", transform));
-            var pythonWriteBigObj = new Action<PyScope, int>((scope, idx) => scope.Set($"d", bigObject));
-            var pythonWriteBiggerObj = new Action<PyScope, int>((scope, idx) => scope.Set($"e", biggerObject));
+            var pythonWriteInt = new Action<PyScope, int>((scope, idx) => scope.Set(a[idx], idx));
+            var pythonWriteVector3 = new Action<PyScope, int>((scope, idx) => scope.Set(b[idx], vector));
+            var pythonWriteTransform = new Action<PyScope, int>((scope, idx) => scope.Set(c[idx], transform));
+            var pythonWriteBigObj = new Action<PyScope, int>((scope, idx) => scope.Set(d[idx], bigObject));
+            var pythonWriteBiggerObj = new Action<PyScope, int>((scope, idx) => scope.Set(e[idx], biggerObject));
 
             var luaWriteInt = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(a[idx], idx));
             var luaWriteVector3 = new Action<NLua.Lua, int>((scope, idx) => scope.SetObjectToPath(b[idx], vector));
@@ -260,15 +248,12 @@ def add(a, b):
         }
 
         internal static void MeasureBasic() {
-            var memoryCleanup = new Action(() => {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-            });
             var pythonWrite = new Action<PyScope, int>((scope, idx) => { scope.Set("a", idx); });
 
             var luaWrite = new Action<NLua.Lua, int>((scope, idx) => { scope.SetObjectToPath("a", idx); });
 
-            var actions = 65536;
+            const int actions = 65536;
+            const int sampleCount = 512;
             var py_writeNormalMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup, pythonWrite), memoryCleanup, null,
                                                GC.GetAllocatedBytesForCurrentThread)[0];
             var py_writeCleanupMemory = Measure(1, (func, cleanup) => PythonProgram.WriteMem(actions, func, cleanup, pythonWrite), memoryCleanup, memoryCleanup,
@@ -284,7 +269,6 @@ def add(a, b):
             var lua_readCleanupMemory = Measure(1, (func, cleanup) => LuaProgram.ReadMem(actions, func, cleanup), memoryCleanup, memoryCleanup,
                                                 GC.GetAllocatedBytesForCurrentThread)[0];
 
-            var sampleCount = 512;
             var py_writeNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.WriteTime(actions, func, action, pythonWrite), memoryCleanup, null,
                                                     () => DateTime.Now);
             var py_readNormalTimeSamples = Measure(sampleCount, (func, action) => PythonProgram.ReadTime(actions, func, action), memoryCleanup, null, () => DateTime.Now);

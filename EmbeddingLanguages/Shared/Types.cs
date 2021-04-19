@@ -49,13 +49,11 @@ namespace Embedded {
         public Vector3[] Vectors;
 
         public BiggerObject() {
-            const int count = 83333; // 2^16 + 2^14 + 1413 Vector3's => 249999 floats ~= 1MB
+            const int count = 83333;
             Vectors = new Vector3[count];
             for (var i = 0; i < count; i++) {
                 Vectors[i] = new Vector3(Rand.Float, Rand.Float, Rand.Float);
             }
-
-            Console.WriteLine($"{Vectors.Length} vectors = {Vectors.Length * 3} floats = {Vectors.Length * 3 * sizeof(float)} bytes");
         }
     }
 
